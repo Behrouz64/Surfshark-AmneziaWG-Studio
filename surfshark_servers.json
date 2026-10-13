@@ -1,0 +1,1225 @@
+{
+  "user_interface": {
+    "private_key": "GJfG1b7zCubnBHQHdNyJVKDMtoylDQgfpqZDhm4jjVM=",
+    "address": "10.14.0.2/16",
+    "dns": "162.252.172.57, 149.154.159.92"
+  },
+  "servers": [
+    {
+      "continent": "Europe",
+      "country": "Albania",
+      "country_code": "AL",
+      "city": "Tirana",
+      "hostname": "al-tia.prod.surfshark.com",
+      "port": 51820,
+      "public_key": "l8EOWPyzt/njrb74CADY4VOhns/TbUN6KFTbytHcFQw=",
+      "resolved_ips": [
+        "172.216.15.211",
+        "172.216.15.28"
+      ],
+      "secure_core": false,
+      "port_forward": false,
+      "server_name": ""
+    },
+    {
+      "continent": "Europe",
+      "country": "Germany",
+      "country_code": "DE",
+      "city": "Berlin",
+      "hostname": "de-ber.prod.surfshark.com",
+      "port": 51820,
+      "public_key": "d3ldwEjnFcbLwD1o8uC5xC3DaSNek8DGeTpOb/h/IE4=",
+      "resolved_ips": [
+        "86.38.98.48",
+        "86.38.98.81"
+      ],
+      "secure_core": false,
+      "port_forward": false,
+      "server_name": ""
+    },
+    {
+      "continent": "Europe",
+      "country": "Germany",
+      "country_code": "DE",
+      "city": "Frankfurt",
+      "hostname": "de-fra.prod.surfshark.com",
+      "port": 51820,
+      "public_key": "fJDA+OA6jzQxfRcoHfC27xz7m3C8/590fRjpntzSpGo=",
+      "resolved_ips": [
+        "149.102.230.132",
+        "192.145.125.93"
+      ],
+      "secure_core": false,
+      "port_forward": false,
+      "server_name": ""
+    },
+    {
+      "continent": "Europe",
+      "country": "Netherlands",
+      "country_code": "NL",
+      "city": "Amsterdam",
+      "hostname": "nl-ams.prod.surfshark.com",
+      "port": 51820,
+      "public_key": "Lxg3jAOKcBA9tGBtB6vEWMFl5LUEB6AwOpuniYn1cig=",
+      "resolved_ips": [
+        "81.19.216.253",
+        "89.46.223.183"
+      ],
+      "secure_core": false,
+      "port_forward": false,
+      "server_name": ""
+    },
+    {
+      "continent": "Europe",
+      "country": "United Kingdom",
+      "country_code": "GB",
+      "city": "London",
+      "hostname": "uk-lon.prod.surfshark.com",
+      "port": 51820,
+      "public_key": "iBJRXLZwXuWWrOZE1ZrAXEKMgV/z0WjG0Tks5rnWLBI=",
+      "resolved_ips": [
+        "178.239.172.59",
+        "86.106.157.162"
+      ],
+      "secure_core": false,
+      "port_forward": false,
+      "server_name": ""
+    },
+    {
+      "continent": "Europe",
+      "country": "United Kingdom",
+      "country_code": "GB",
+      "city": "Manchester",
+      "hostname": "uk-man.prod.surfshark.com",
+      "port": 51820,
+      "public_key": "9R8He1cP8Laf5MT58FcaEYtPW/qnN3M9MQThIXOIvHs=",
+      "resolved_ips": [
+        "103.214.44.42",
+        "37.120.159.131"
+      ],
+      "secure_core": false,
+      "port_forward": false,
+      "server_name": ""
+    },
+    {
+      "continent": "Europe",
+      "country": "France",
+      "country_code": "FR",
+      "city": "Paris",
+      "hostname": "fr-par.prod.surfshark.com",
+      "port": 51820,
+      "public_key": "AsvLuvKKADdc67aA/vHA3vb61S6YnGGx2Pd4aP4wal8=",
+      "resolved_ips": [
+        "143.244.57.91",
+        "146.70.194.229"
+      ],
+      "secure_core": false,
+      "port_forward": false,
+      "server_name": ""
+    },
+    {
+      "continent": "Europe",
+      "country": "France",
+      "country_code": "FR",
+      "city": "Marseille",
+      "hostname": "fr-mrs.prod.surfshark.com",
+      "port": 51820,
+      "public_key": "QYa3ZFLwWAHKiJzOcbM73K7KBE0tdJYuirbGb+uH0H0=",
+      "resolved_ips": [
+        "103.93.42.27",
+        "138.199.16.140"
+      ],
+      "secure_core": false,
+      "port_forward": false,
+      "server_name": ""
+    },
+    {
+      "continent": "Europe",
+      "country": "Switzerland",
+      "country_code": "CH",
+      "city": "Zurich",
+      "hostname": "ch-zur.prod.surfshark.com",
+      "port": 51820,
+      "public_key": "qFuwaE8IyDbNBTNar3xAXRGaBdkTtmLh1uIGMJxTxUs=",
+      "resolved_ips": [
+        "156.146.62.39",
+        "156.146.62.44"
+      ],
+      "secure_core": false,
+      "port_forward": false,
+      "server_name": ""
+    },
+    {
+      "continent": "Europe",
+      "country": "Sweden",
+      "country_code": "SE",
+      "city": "Stockholm",
+      "hostname": "se-sto.prod.surfshark.com",
+      "port": 51820,
+      "public_key": "oUFRc+2emXgogDVWnJF4RAzr72PyafCzMVeQOgG92lY=",
+      "resolved_ips": [
+        "185.76.9.51",
+        "195.181.166.228"
+      ],
+      "secure_core": false,
+      "port_forward": false,
+      "server_name": ""
+    },
+    {
+      "continent": "Europe",
+      "country": "Norway",
+      "country_code": "NO",
+      "city": "Oslo",
+      "hostname": "no-osl.prod.surfshark.com",
+      "port": 51820,
+      "public_key": "pXfZi2vsdd88qrnqh+bwqHG4IYD42pj3T1wCm3PIGmw=",
+      "resolved_ips": [
+        "185.253.97.107",
+        "185.253.97.117"
+      ],
+      "secure_core": false,
+      "port_forward": false,
+      "server_name": ""
+    },
+    {
+      "continent": "Europe",
+      "country": "Finland",
+      "country_code": "FI",
+      "city": "Helsinki",
+      "hostname": "fi-hel.prod.surfshark.com",
+      "port": 51820,
+      "public_key": "+nv/Z8I2VS0eRdZwkpQW3U9RmsboTz2MUF94jVg5w10=",
+      "resolved_ips": [
+        "193.56.113.13",
+        "193.56.113.8"
+      ],
+      "secure_core": false,
+      "port_forward": false,
+      "server_name": ""
+    },
+    {
+      "continent": "Europe",
+      "country": "Denmark",
+      "country_code": "DK",
+      "city": "Copenhagen",
+      "hostname": "dk-cph.prod.surfshark.com",
+      "port": 51820,
+      "public_key": "peDjRPEdHHmo0hGootZ9f+MQCEXmziFkLhMTl2PeXRM=",
+      "resolved_ips": [
+        "146.70.42.157",
+        "146.70.92.13"
+      ],
+      "secure_core": false,
+      "port_forward": false,
+      "server_name": ""
+    },
+    {
+      "continent": "Europe",
+      "country": "Belgium",
+      "country_code": "BE",
+      "city": "Brussels",
+      "hostname": "be-bru.prod.surfshark.com",
+      "port": 51820,
+      "public_key": "9wZOjtwuKEc0GBcvc3xJQ4Kjo8G3EMXu6zJRzbanOjc=",
+      "resolved_ips": [
+        "5.253.205.157",
+        "79.127.164.7"
+      ],
+      "secure_core": false,
+      "port_forward": false,
+      "server_name": ""
+    },
+    {
+      "continent": "Europe",
+      "country": "Ireland",
+      "country_code": "IE",
+      "city": "Dublin",
+      "hostname": "ie-dub.prod.surfshark.com",
+      "port": 51820,
+      "public_key": "TjYxodFNdGlefxnWqe9vWWJHnz3meYWWhiIJyU8rgg8=",
+      "resolved_ips": [
+        "149.34.242.18",
+        "149.34.242.97"
+      ],
+      "secure_core": false,
+      "port_forward": false,
+      "server_name": ""
+    },
+    {
+      "continent": "Europe",
+      "country": "Italy",
+      "country_code": "IT",
+      "city": "Rome",
+      "hostname": "it-rom.prod.surfshark.com",
+      "port": 51820,
+      "public_key": "fqxSeDr7n249iywruwLMwkV3r36svPT1tLf9TJOTFAw=",
+      "resolved_ips": [
+        "37.120.207.235",
+        "37.120.207.243"
+      ],
+      "secure_core": false,
+      "port_forward": false,
+      "server_name": ""
+    },
+    {
+      "continent": "Europe",
+      "country": "Italy",
+      "country_code": "IT",
+      "city": "Milan",
+      "hostname": "it-mil.prod.surfshark.com",
+      "port": 51820,
+      "public_key": "vIMHzH5FHdVkrhOOc0u/FySVhumaLC3XUk39Wk34LnE=",
+      "resolved_ips": [
+        "146.70.182.51",
+        "84.17.58.200"
+      ],
+      "secure_core": false,
+      "port_forward": false,
+      "server_name": ""
+    },
+    {
+      "continent": "Europe",
+      "country": "Spain",
+      "country_code": "ES",
+      "city": "Madrid",
+      "hostname": "es-mad.prod.surfshark.com",
+      "port": 51820,
+      "public_key": "a30vOQfjwPzjRxGNi2dvSAMdaPHEYatR84cUjXKOwls=",
+      "resolved_ips": [
+        "212.102.48.10",
+        "84.17.62.179"
+      ],
+      "secure_core": false,
+      "port_forward": false,
+      "server_name": ""
+    },
+    {
+      "continent": "Europe",
+      "country": "Portugal",
+      "country_code": "PT",
+      "city": "Lisbon",
+      "hostname": "pt-lis.prod.surfshark.com",
+      "port": 51820,
+      "public_key": "JgYlpt7jFh0FV2QO0QQ3yFfsnqikUq977V3cObFGTQ4=",
+      "resolved_ips": [
+        "149.88.20.75",
+        "149.88.20.87"
+      ],
+      "secure_core": false,
+      "port_forward": false,
+      "server_name": ""
+    },
+    {
+      "continent": "Europe",
+      "country": "Austria",
+      "country_code": "AT",
+      "city": "Vienna",
+      "hostname": "at-vie.prod.surfshark.com",
+      "port": 51820,
+      "public_key": "dPZe8Jq3Hu0k07MDk+Y4+AS2XHSLYalyg91TSFXRYEA=",
+      "resolved_ips": [
+        "87.249.133.12",
+        "87.249.133.14"
+      ],
+      "secure_core": false,
+      "port_forward": false,
+      "server_name": ""
+    },
+    {
+      "continent": "Europe",
+      "country": "Poland",
+      "country_code": "PL",
+      "city": "Warsaw",
+      "hostname": "pl-waw.prod.surfshark.com",
+      "port": 51820,
+      "public_key": "vBa3HK7QXietG64rHRLm085VMS2cAX2paeAaphB/SEU=",
+      "resolved_ips": [
+        "45.134.212.248",
+        "45.134.212.53"
+      ],
+      "secure_core": false,
+      "port_forward": false,
+      "server_name": ""
+    },
+    {
+      "continent": "Europe",
+      "country": "Czech Republic",
+      "country_code": "CZ",
+      "city": "Prague",
+      "hostname": "cz-prg.prod.surfshark.com",
+      "port": 51820,
+      "public_key": "c1bfP+OBTj6WUe8NDH8d6nDTwpQicopfdkHFx3BIaSk=",
+      "resolved_ips": [
+        "185.180.14.151",
+        "185.242.6.67"
+      ],
+      "secure_core": false,
+      "port_forward": false,
+      "server_name": ""
+    },
+    {
+      "continent": "Europe",
+      "country": "Slovakia",
+      "country_code": "SK",
+      "city": "Bratislava",
+      "hostname": "sk-bts.prod.surfshark.com",
+      "port": 51820,
+      "public_key": "T5b7+uwUFqN5r1WsfBXURpSnYCYRLFAVreKkIQHGOlw=",
+      "resolved_ips": [
+        "146.70.114.179",
+        "185.76.8.210"
+      ],
+      "secure_core": false,
+      "port_forward": false,
+      "server_name": ""
+    },
+    {
+      "continent": "Europe",
+      "country": "Hungary",
+      "country_code": "HU",
+      "city": "Budapest",
+      "hostname": "hu-bud.prod.surfshark.com",
+      "port": 51820,
+      "public_key": "Pk3+iZNP0uWkDTSmEHlUeSA3WyiFXLXgYgAQ5wNyIBk=",
+      "resolved_ips": [
+        "146.70.120.37",
+        "79.127.182.4"
+      ],
+      "secure_core": false,
+      "port_forward": false,
+      "server_name": ""
+    },
+    {
+      "continent": "Europe",
+      "country": "Romania",
+      "country_code": "RO",
+      "city": "Bucharest",
+      "hostname": "ro-buc.prod.surfshark.com",
+      "port": 51820,
+      "public_key": "uRT3uSAUwvm7Rp+s3n5V9JibsKHKAZ/8+SU3psG8QxI=",
+      "resolved_ips": [
+        "169.150.199.169",
+        "89.33.8.195"
+      ],
+      "secure_core": false,
+      "port_forward": false,
+      "server_name": ""
+    },
+    {
+      "continent": "Europe",
+      "country": "Bulgaria",
+      "country_code": "BG",
+      "city": "Sofia",
+      "hostname": "bg-sof.prod.surfshark.com",
+      "port": 51820,
+      "public_key": "LQFiCiZcPEoYasKRLbCfXp2fYYsj8wiMr/L9u6hYqSo=",
+      "resolved_ips": [
+        "185.9.16.107",
+        "185.9.16.109"
+      ],
+      "secure_core": false,
+      "port_forward": false,
+      "server_name": ""
+    },
+    {
+      "continent": "Europe",
+      "country": "Greece",
+      "country_code": "GR",
+      "city": "Athens",
+      "hostname": "gr-ath.prod.surfshark.com",
+      "port": 51820,
+      "public_key": "bXnjQGLhuauvBMg51YIAhwX40YqNL2ImyEub5DpHaBk=",
+      "resolved_ips": [
+        "149.102.246.103",
+        "149.102.246.196"
+      ],
+      "secure_core": false,
+      "port_forward": false,
+      "server_name": ""
+    },
+    {
+      "continent": "Europe",
+      "country": "Cyprus",
+      "country_code": "CY",
+      "city": "Nicosia",
+      "hostname": "cy-nic.prod.surfshark.com",
+      "port": 51820,
+      "public_key": "kEAQgNChxGgrzoKPpCPFJKh0L1/5rXIq08KSY4g26zY=",
+      "resolved_ips": [
+        "193.19.204.72",
+        "193.19.204.82"
+      ],
+      "secure_core": false,
+      "port_forward": false,
+      "server_name": ""
+    },
+    {
+      "continent": "Europe",
+      "country": "Croatia",
+      "country_code": "HR",
+      "city": "Zagreb",
+      "hostname": "hr-zag.prod.surfshark.com",
+      "port": 51820,
+      "public_key": "nIQmC5T4H0HX4yA2u/Z5rrbLQDAOLA+kFCdt8S94xXg=",
+      "resolved_ips": [
+        "149.102.247.135",
+        "149.102.247.143"
+      ],
+      "secure_core": false,
+      "port_forward": false,
+      "server_name": ""
+    },
+    {
+      "continent": "Europe",
+      "country": "Slovenia",
+      "country_code": "SI",
+      "city": "Ljubljana",
+      "hostname": "si-lju.prod.surfshark.com",
+      "port": 51820,
+      "public_key": "yPdmxOfzm06fotkt/dlaAiyxWPaWfCuDPaUljNx+c38=",
+      "resolved_ips": [
+        "195.158.249.23",
+        "195.158.249.25"
+      ],
+      "secure_core": false,
+      "port_forward": false,
+      "server_name": ""
+    },
+    {
+      "continent": "Europe",
+      "country": "Serbia",
+      "country_code": "RS",
+      "city": "Belgrade",
+      "hostname": "rs-beg.prod.surfshark.com",
+      "port": 51820,
+      "public_key": "A3vmr6/umw5sP8anxNyipgi5oEnOnZdqB1K/cbQpMiI=",
+      "resolved_ips": [
+        "146.70.111.83",
+        "146.70.111.85"
+      ],
+      "secure_core": false,
+      "port_forward": false,
+      "server_name": ""
+    },
+    {
+      "continent": "Europe",
+      "country": "Bosnia and Herzegovina",
+      "country_code": "BA",
+      "city": "Sarajevo",
+      "hostname": "ba-sjj.prod.surfshark.com",
+      "port": 51820,
+      "public_key": "hsm/ps/uxcsVNzT3OmV/l7ZWv+TRIS+IM+N6/nTymkw=",
+      "resolved_ips": [
+        "89.117.46.37",
+        "89.117.46.51"
+      ],
+      "secure_core": false,
+      "port_forward": false,
+      "server_name": ""
+    },
+    {
+      "continent": "Europe",
+      "country": "North Macedonia",
+      "country_code": "MK",
+      "city": "Skopje",
+      "hostname": "mk-skp.prod.surfshark.com",
+      "port": 51820,
+      "public_key": "dZNq48noPkey9rwSbAU+masbafpDSaAmtAMaP+gzLxA=",
+      "resolved_ips": [
+        "217.9.244.101",
+        "217.9.244.99"
+      ],
+      "secure_core": false,
+      "port_forward": false,
+      "server_name": ""
+    },
+    {
+      "continent": "Europe",
+      "country": "Estonia",
+      "country_code": "EE",
+      "city": "Tallinn",
+      "hostname": "ee-tll.prod.surfshark.com",
+      "port": 51820,
+      "public_key": "CsdrT+WfcMRPhrOWgZeHj9DQiQtJfYFci94K5ztjr2E=",
+      "resolved_ips": [
+        "185.174.159.107",
+        "185.174.159.194"
+      ],
+      "secure_core": false,
+      "port_forward": false,
+      "server_name": ""
+    },
+    {
+      "continent": "Europe",
+      "country": "Latvia",
+      "country_code": "LV",
+      "city": "Riga",
+      "hostname": "lv-rig.prod.surfshark.com",
+      "port": 51820,
+      "public_key": "EmghYf9rIpwOQ0uIjIxgCXs/WwHJthNvPIv5iKseE3A=",
+      "resolved_ips": [
+        "80.246.31.69",
+        "80.246.31.98"
+      ],
+      "secure_core": false,
+      "port_forward": false,
+      "server_name": ""
+    },
+    {
+      "continent": "Europe",
+      "country": "Lithuania",
+      "country_code": "LT",
+      "city": "Vilnius",
+      "hostname": "lt-vno.prod.surfshark.com",
+      "port": 51820,
+      "public_key": "pC7xJD56uFFJ7qHpe3XvXXhjwZcoMco09ySHOg4h+iA=",
+      "resolved_ips": [
+        "62.197.149.115",
+        "62.197.149.128"
+      ],
+      "secure_core": false,
+      "port_forward": false,
+      "server_name": ""
+    },
+    {
+      "continent": "Europe",
+      "country": "Moldova",
+      "country_code": "MD",
+      "city": "Chisinau",
+      "hostname": "md-chi.prod.surfshark.com",
+      "port": 51820,
+      "public_key": "4Exn42t337sxoBzYHxgmDBNq+AhTYz6nvEj98TWY50Y=",
+      "resolved_ips": [
+        "217.9.245.101",
+        "217.9.245.83"
+      ],
+      "secure_core": false,
+      "port_forward": false,
+      "server_name": ""
+    },
+    {
+      "continent": "Europe",
+      "country": "Ukraine",
+      "country_code": "UA",
+      "city": "Kyiv",
+      "hostname": "ua-iev.prod.surfshark.com",
+      "port": 51820,
+      "public_key": "wy+PhWBP715KfBrsQR4P3JUalYc9a77FmZWQinwYLmo=",
+      "resolved_ips": [
+        "143.244.46.105",
+        "143.244.46.231"
+      ],
+      "secure_core": false,
+      "port_forward": false,
+      "server_name": ""
+    },
+    {
+      "continent": "Europe",
+      "country": "Iceland",
+      "country_code": "IS",
+      "city": "Reykjavik",
+      "hostname": "is-rkv.prod.surfshark.com",
+      "port": 51820,
+      "public_key": "d0m2sIa0JGcxCBvoWDU77SjmPoiWI/oKoX1TL2f2fTA=",
+      "resolved_ips": [
+        "45.139.252.112",
+        "45.139.252.18"
+      ],
+      "secure_core": false,
+      "port_forward": false,
+      "server_name": ""
+    },
+    {
+      "continent": "Europe",
+      "country": "Luxembourg",
+      "country_code": "LU",
+      "city": "Steinsel",
+      "hostname": "lu-ste.prod.surfshark.com",
+      "port": 51820,
+      "public_key": "68JVBL/M2AYQ9gYHtcpmZ6Pl+ayhJjTL2sr6Ej1VEFg=",
+      "resolved_ips": [
+        "185.153.151.164",
+        "185.153.151.174"
+      ],
+      "secure_core": false,
+      "port_forward": false,
+      "server_name": ""
+    },
+    {
+      "continent": "Europe",
+      "country": "Turkey",
+      "country_code": "TR",
+      "city": "Istanbul",
+      "hostname": "tr-ist.prod.surfshark.com",
+      "port": 51820,
+      "public_key": "sF/TlxU9XaDN3QQBT/lu2Pw9qpD3XpDqLBfInBtff2A=",
+      "resolved_ips": [
+        "45.136.155.50",
+        "45.136.155.51"
+      ],
+      "secure_core": false,
+      "port_forward": false,
+      "server_name": ""
+    },
+    {
+      "continent": "Asia",
+      "country": "Armenia",
+      "country_code": "AM",
+      "city": "Yerevan",
+      "hostname": "am-evn.prod.surfshark.com",
+      "port": 51820,
+      "public_key": "B+aSYrw7JSq7b60uK0nrMQGCiJ48QwiUp/aoRpYX2lU=",
+      "resolved_ips": [
+        "92.62.120.133",
+        "92.62.120.85"
+      ],
+      "secure_core": false,
+      "port_forward": false,
+      "server_name": ""
+    },
+    {
+      "continent": "Asia",
+      "country": "Azerbaijan",
+      "country_code": "AZ",
+      "city": "Baku",
+      "hostname": "az-bak.prod.surfshark.com",
+      "port": 51820,
+      "public_key": "pvWYTFxIpqo25NGTertIIWnccS/sUQ6fIkqd8XJYzEI=",
+      "resolved_ips": [
+        "89.117.47.51",
+        "89.117.47.69"
+      ],
+      "secure_core": false,
+      "port_forward": false,
+      "server_name": ""
+    },
+    {
+      "continent": "Asia",
+      "country": "Georgia",
+      "country_code": "GE",
+      "city": "Tbilisi",
+      "hostname": "ge-tbs.prod.surfshark.com",
+      "port": 51820,
+      "public_key": "L79E4IoaVZBXOyoMM82TvUIbiKlloRbUnT8R2Cl3PVM=",
+      "resolved_ips": [
+        "83.97.115.18",
+        "83.97.115.20"
+      ],
+      "secure_core": false,
+      "port_forward": false,
+      "server_name": ""
+    },
+    {
+      "continent": "Asia",
+      "country": "Kazakhstan",
+      "country_code": "KZ",
+      "city": "Oral",
+      "hostname": "kz-ura.prod.surfshark.com",
+      "port": 51820,
+      "public_key": "c8SPrUWVMjSm3xdZRF4eg57sdEo2TFmBDVKP+A+quHM=",
+      "resolved_ips": [
+        "217.9.250.101",
+        "217.9.250.83"
+      ],
+      "secure_core": false,
+      "port_forward": false,
+      "server_name": ""
+    },
+    {
+      "continent": "Asia",
+      "country": "United Arab Emirates",
+      "country_code": "AE",
+      "city": "Dubai",
+      "hostname": "ae-dub.prod.surfshark.com",
+      "port": 51820,
+      "public_key": "6dZGkg0iAMgQuOCGknAgBAqDEeJeBQ4Of5eblO4aNC8=",
+      "resolved_ips": [
+        "146.70.102.51",
+        "217.138.193.251"
+      ],
+      "secure_core": false,
+      "port_forward": false,
+      "server_name": ""
+    },
+    {
+      "continent": "Asia",
+      "country": "Israel",
+      "country_code": "IL",
+      "city": "Tel Aviv",
+      "hostname": "il-tlv.prod.surfshark.com",
+      "port": 51820,
+      "public_key": "ZEG2fUrtohnVePblUlDM6wyyeTobzsABnMjTTFmqNUE=",
+      "resolved_ips": [
+        "169.150.227.135",
+        "169.150.227.147"
+      ],
+      "secure_core": false,
+      "port_forward": false,
+      "server_name": ""
+    },
+    {
+      "continent": "Asia",
+      "country": "Singapore",
+      "country_code": "SG",
+      "city": "Singapore",
+      "hostname": "sg-sng.prod.surfshark.com",
+      "port": 51820,
+      "public_key": "MGfgkhJsMVMTO33h1wr76+z6gQr/93VcGdClfbaPsnU=",
+      "resolved_ips": [
+        "151.240.33.24",
+        "151.240.33.28"
+      ],
+      "secure_core": false,
+      "port_forward": false,
+      "server_name": ""
+    },
+    {
+      "continent": "Asia",
+      "country": "Japan",
+      "country_code": "JP",
+      "city": "Tokyo",
+      "hostname": "jp-tok.prod.surfshark.com",
+      "port": 51820,
+      "public_key": "YJSjrc/WWOjQUyUi4iYcHb7LsWWoCY+2fK8/8VtC/BY=",
+      "resolved_ips": [
+        "82.26.195.46",
+        "82.26.195.48"
+      ],
+      "secure_core": false,
+      "port_forward": false,
+      "server_name": ""
+    },
+    {
+      "continent": "Asia",
+      "country": "South Korea",
+      "country_code": "KR",
+      "city": "Seoul",
+      "hostname": "kr-seo.prod.surfshark.com",
+      "port": 51820,
+      "public_key": "bD/m2mdKxJXG2wTkLsmWpiW8xZwkDdrrrwC44auOhQg=",
+      "resolved_ips": [
+        "61.97.243.116",
+        "84.233.167.140"
+      ],
+      "secure_core": false,
+      "port_forward": false,
+      "server_name": ""
+    },
+    {
+      "continent": "Asia",
+      "country": "Hong Kong",
+      "country_code": "HK",
+      "city": "Hong Kong",
+      "hostname": "hk-hkg.prod.surfshark.com",
+      "port": 51820,
+      "public_key": "JYHdktdtuM7inbtsxRKSDpnBVTWQ5+QLZ/cWWmf4VRg=",
+      "resolved_ips": [
+        "138.199.62.14",
+        "172.216.245.26"
+      ],
+      "secure_core": false,
+      "port_forward": false,
+      "server_name": ""
+    },
+    {
+      "continent": "Asia",
+      "country": "Taiwan",
+      "country_code": "TW",
+      "city": "Taipei",
+      "hostname": "tw-tai.prod.surfshark.com",
+      "port": 51820,
+      "public_key": "P0vaGUOUE7V5bbGOYY2WgQeZnTZEHvIr+dfebU7W4Ao=",
+      "resolved_ips": [
+        "89.117.42.11",
+        "89.117.42.93"
+      ],
+      "secure_core": false,
+      "port_forward": false,
+      "server_name": ""
+    },
+    {
+      "continent": "Asia",
+      "country": "Malaysia",
+      "country_code": "MY",
+      "city": "Kuala Lumpur",
+      "hostname": "my-kul.prod.surfshark.com",
+      "port": 51820,
+      "public_key": "AS84LXlJfgBwGHc70MvtGRxsMqNNucZ2pNOBayJUm04=",
+      "resolved_ips": [
+        "202.176.4.52",
+        "202.176.4.54"
+      ],
+      "secure_core": false,
+      "port_forward": false,
+      "server_name": ""
+    },
+    {
+      "continent": "Asia",
+      "country": "Thailand",
+      "country_code": "TH",
+      "city": "Bangkok",
+      "hostname": "th-bkk.prod.surfshark.com",
+      "port": 51820,
+      "public_key": "OoFY46j/w4uQFyFu/OQ/h3x+ymJ1DJ4UR1fwGNxOxk0=",
+      "resolved_ips": [
+        "151.240.88.85"
+      ],
+      "secure_core": false,
+      "port_forward": false,
+      "server_name": ""
+    },
+    {
+      "continent": "Oceania",
+      "country": "Australia",
+      "country_code": "AU",
+      "city": "Sydney",
+      "hostname": "au-syd.prod.surfshark.com",
+      "port": 51820,
+      "public_key": "Y5KM9kHdM0upMsIJWUQquOY1RgkWX69AHw/Dl5KyIk4=",
+      "resolved_ips": [
+        "149.88.101.2",
+        "180.149.228.163"
+      ],
+      "secure_core": false,
+      "port_forward": false,
+      "server_name": ""
+    },
+    {
+      "continent": "Oceania",
+      "country": "Australia",
+      "country_code": "AU",
+      "city": "Melbourne",
+      "hostname": "au-mel.prod.surfshark.com",
+      "port": 51820,
+      "public_key": "yYX9yLjHOSWVAsaujcIVWAxF9wYMmHupG1RtJk+u21o=",
+      "resolved_ips": [
+        "195.86.27.14",
+        "195.86.27.22"
+      ],
+      "secure_core": false,
+      "port_forward": false,
+      "server_name": ""
+    },
+    {
+      "continent": "Oceania",
+      "country": "New Zealand",
+      "country_code": "NZ",
+      "city": "Auckland",
+      "hostname": "nz-akl.prod.surfshark.com",
+      "port": 51820,
+      "public_key": "xv8P19y0m9ojrLelCaPzGtaVv7tlPzLgZxvAD7lpYDg=",
+      "resolved_ips": [
+        "180.149.231.3",
+        "62.93.164.233"
+      ],
+      "secure_core": false,
+      "port_forward": false,
+      "server_name": ""
+    },
+    {
+      "continent": "Americas",
+      "country": "United States",
+      "country_code": "US",
+      "city": "New York",
+      "hostname": "us-nyc.prod.surfshark.com",
+      "port": 51820,
+      "public_key": "rhuoCmHdyYrh0zW3J0YXZK4aN3It7DD26TXlACuWnwU=",
+      "resolved_ips": [
+        "146.70.186.181",
+        "194.33.45.96"
+      ],
+      "secure_core": false,
+      "port_forward": false,
+      "server_name": ""
+    },
+    {
+      "continent": "Americas",
+      "country": "United States",
+      "country_code": "US",
+      "city": "Los Angeles",
+      "hostname": "us-lax.prod.surfshark.com",
+      "port": 51820,
+      "public_key": "m+L7BVQWDwU2TxjfspMRLkRctvmo7fOkd+eVk6KC5lM=",
+      "resolved_ips": [
+        "45.149.173.200",
+        "89.187.187.83"
+      ],
+      "secure_core": false,
+      "port_forward": false,
+      "server_name": ""
+    },
+    {
+      "continent": "Americas",
+      "country": "United States",
+      "country_code": "US",
+      "city": "Chicago",
+      "hostname": "us-chi.prod.surfshark.com",
+      "port": 51820,
+      "public_key": "DpMfulanF/MVHmt3AX4dqLqcyE0dpPqYBjDlWMaUI00=",
+      "resolved_ips": [
+        "138.199.42.157",
+        "138.199.42.169"
+      ],
+      "secure_core": false,
+      "port_forward": false,
+      "server_name": ""
+    },
+    {
+      "continent": "Americas",
+      "country": "United States",
+      "country_code": "US",
+      "city": "Miami",
+      "hostname": "us-mia.prod.surfshark.com",
+      "port": 51820,
+      "public_key": "KvJ/jtWb8BsBI85OcZnOIJu9kfh12mCMR4cejWFpDCc=",
+      "resolved_ips": [
+        "146.70.45.197",
+        "212.102.61.141"
+      ],
+      "secure_core": false,
+      "port_forward": false,
+      "server_name": ""
+    },
+    {
+      "continent": "Americas",
+      "country": "United States",
+      "country_code": "US",
+      "city": "Seattle",
+      "hostname": "us-sea.prod.surfshark.com",
+      "port": 51820,
+      "public_key": "SpMH/p90bg9ZAG6V2DWJQ9csWPVnKcDVppIp9Xul5G8=",
+      "resolved_ips": [
+        "212.102.46.35",
+        "212.102.46.42"
+      ],
+      "secure_core": false,
+      "port_forward": false,
+      "server_name": ""
+    },
+    {
+      "continent": "Americas",
+      "country": "Canada",
+      "country_code": "CA",
+      "city": "Toronto",
+      "hostname": "ca-tor.prod.surfshark.com",
+      "port": 51820,
+      "public_key": "W9bzkcL3fiV64vDpB4pbrz8QafNn3y5P9Yc/kQvy4TA=",
+      "resolved_ips": [
+        "149.88.16.150",
+        "37.19.211.99"
+      ],
+      "secure_core": false,
+      "port_forward": false,
+      "server_name": ""
+    },
+    {
+      "continent": "Americas",
+      "country": "Canada",
+      "country_code": "CA",
+      "city": "Vancouver",
+      "hostname": "ca-van.prod.surfshark.com",
+      "port": 51820,
+      "public_key": "o4HezxSsbNqJFJZj+VBw/QXFLpfNo7PZu8xe7H2hTw0=",
+      "resolved_ips": [
+        "149.22.81.130",
+        "216.246.31.97"
+      ],
+      "secure_core": false,
+      "port_forward": false,
+      "server_name": ""
+    },
+    {
+      "continent": "Americas",
+      "country": "Brazil",
+      "country_code": "BR",
+      "city": "Sao Paulo",
+      "hostname": "br-sao.prod.surfshark.com",
+      "port": 51820,
+      "public_key": "IFTVXxhLEqVgZI/JGOPRtmrNUQW1DNljeBe8Ys7v90A=",
+      "resolved_ips": [
+        "138.199.58.42",
+        "146.70.163.211"
+      ],
+      "secure_core": false,
+      "port_forward": false,
+      "server_name": ""
+    },
+    {
+      "continent": "Americas",
+      "country": "Chile",
+      "country_code": "CL",
+      "city": "Santiago",
+      "hostname": "cl-san.prod.surfshark.com",
+      "port": 51820,
+      "public_key": "FdTRnh0g+FYFPj5UURQIcDbygd+2gMRrslErfmZxdDo=",
+      "resolved_ips": [
+        "149.88.104.136",
+        "149.88.104.139"
+      ],
+      "secure_core": false,
+      "port_forward": false,
+      "server_name": ""
+    },
+    {
+      "continent": "Americas",
+      "country": "Mexico",
+      "country_code": "MX",
+      "city": "Queretaro",
+      "hostname": "mx-qro.prod.surfshark.com",
+      "port": 51820,
+      "public_key": "6C8O3L/Li0JOO5aWvL6PrciiZOOaRBtWmempOUENLQs=",
+      "resolved_ips": [
+        "103.88.234.169",
+        "103.88.234.173"
+      ],
+      "secure_core": false,
+      "port_forward": false,
+      "server_name": ""
+    },
+    {
+      "continent": "Africa",
+      "country": "South Africa",
+      "country_code": "ZA",
+      "city": "Johannesburg",
+      "hostname": "za-jnb.prod.surfshark.com",
+      "port": 51820,
+      "public_key": "Wj/fSWxNLs1igL1uTRp4zLFNohe4S1wqNTYRHevthUA=",
+      "resolved_ips": [
+        "149.102.248.138",
+        "154.47.30.105"
+      ],
+      "secure_core": false,
+      "port_forward": false,
+      "server_name": ""
+    },
+    {
+      "continent": "Africa",
+      "country": "Egypt",
+      "country_code": "EG",
+      "city": "Cairo",
+      "hostname": "eg-cai.prod.surfshark.com",
+      "port": 51820,
+      "public_key": "EKaIyCUV8aqCtRkV6jfkU1IicE5ZaU2RC4VKAdgjOyA=",
+      "resolved_ips": [
+        "62.197.147.51",
+        "62.197.147.53"
+      ],
+      "secure_core": false,
+      "port_forward": false,
+      "server_name": ""
+    },
+    {
+      "continent": "Africa",
+      "country": "Nigeria",
+      "country_code": "NG",
+      "city": "Lagos",
+      "hostname": "ng-lag.prod.surfshark.com",
+      "port": 51820,
+      "public_key": "mMmsmMyqtASb4V42H5nxyD8BgauWrNhCCZdBHCsbC00=",
+      "resolved_ips": [
+        "79.127.149.49",
+        "79.127.149.51"
+      ],
+      "secure_core": false,
+      "port_forward": false,
+      "server_name": ""
+    },
+    {
+      "continent": "Africa",
+      "country": "Morocco",
+      "country_code": "MA",
+      "city": "Rabat",
+      "hostname": "ma-rab.prod.surfshark.com",
+      "port": 51820,
+      "public_key": "Tl7KINtNnar9fVQD8LG2dswOEqSKmUP9ioimCjo6jHc=",
+      "resolved_ips": [
+        "89.117.44.34",
+        "89.117.44.36"
+      ],
+      "secure_core": false,
+      "port_forward": false,
+      "server_name": ""
+    },
+    {
+      "continent": "Europe",
+      "country": "Andorra",
+      "country_code": "AD",
+      "city": "Andorra la Vella",
+      "hostname": "ad-leu.prod.surfshark.com",
+      "port": 51820,
+      "public_key": "alv2SqjLM8Aw5yz/7pGZydfALPfYzgwDquAe5dWX12s=",
+      "resolved_ips": [
+        "62.197.152.149",
+        "62.197.152.181"
+      ],
+      "secure_core": false,
+      "port_forward": false,
+      "server_name": ""
+    },
+    {
+      "continent": "Americas",
+      "country": "Bahamas",
+      "country_code": "BS",
+      "city": "Nassau",
+      "hostname": "bs-nas.prod.surfshark.com",
+      "port": 51820,
+      "public_key": "uM3cUZiQ46nRLALqOQfBz2cqg+RyR/OIHH0Xvwf9wHY=",
+      "resolved_ips": [
+        "62.197.145.50",
+        "62.197.145.52"
+      ],
+      "secure_core": false,
+      "port_forward": false,
+      "server_name": ""
+    },
+    {
+      "continent": "Asia",
+      "country": "Cambodia",
+      "country_code": "KH",
+      "city": "Phnom Penh",
+      "hostname": "kh-pnh.prod.surfshark.com",
+      "port": 51820,
+      "public_key": "z2Ik8BG6XgosyYE/O4Vz4kiPTZyoWSlJvZtFeFlNclI=",
+      "resolved_ips": [
+        "62.197.146.22",
+        "62.197.146.24"
+      ],
+      "secure_core": false,
+      "port_forward": false,
+      "server_name": ""
+    },
+    {
+      "continent": "Asia",
+      "country": "Mongolia",
+      "country_code": "MN",
+      "city": "Ulaanbaatar",
+      "hostname": "mn-uln.prod.surfshark.com",
+      "port": 51820,
+      "public_key": "3nLHy4uBd2nBUDuAuR6AM58yHLiX2CAXg8kdgEr6tV4=",
+      "resolved_ips": [
+        "62.197.155.67",
+        "62.197.155.69"
+      ],
+      "secure_core": false,
+      "port_forward": false,
+      "server_name": ""
+    },
+    {
+      "continent": "Asia",
+      "country": "Myanmar",
+      "country_code": "MM",
+      "city": "Naypyidaw",
+      "hostname": "mm-nyt.prod.surfshark.com",
+      "port": 51820,
+      "public_key": "tehGZzcmdK59x99I9dbfuWOHSxBdPsz5lB+uAoT75kE=",
+      "resolved_ips": [
+        "45.95.242.51",
+        "45.95.242.54"
+      ],
+      "secure_core": false,
+      "port_forward": false,
+      "server_name": ""
+    }
+  ],
+  "last_updated": "2026-10-12T06:01:24.770738"
+}

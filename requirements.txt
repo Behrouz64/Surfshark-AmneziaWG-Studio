@@ -1,0 +1,16 @@
+# Desktop GUI Framework
+flet>=0.23.0
+
+# Browser Automation for Attended Login & Cluster Harvesting
+playwright>=1.44.0
+
+# Asynchronous DNS-over-HTTPS (DoH) & Anti-Poisoning Resolution
+httpx>=0.27.0
+dnspython>=2.6.0
+
+# QR Code Generation for Mobile Amnezia App
+qrcode[pil]>=7.4.2
+pillow>=10.0.0
+
+# Cryptography for WireGuard handshake simulation & Key validation
+cryptography>=42.0.0

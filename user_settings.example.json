@@ -1,0 +1,13 @@
+{
+  "featured_countries": [
+    "Albania",
+    "Andorra",
+    "Bahamas",
+    "Cambodia",
+    "Mongolia",
+    "US"
+  ],
+  "scan_mode": "smart",
+  "scan_timeout": 2.0,
+  "probe_count": 3
+}
