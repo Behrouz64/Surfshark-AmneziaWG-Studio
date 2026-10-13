@@ -7,10 +7,17 @@ import os
 import shutil
 import tempfile
 import unittest
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import ui
+from config_builder import ShadowrocketStorage
 from ui import SurfsharkAmneziaApp, DEFAULT_FEATURED_COUNTRIES
+from vpn_detector import VpnStatus
+
+_NO_VPN = VpnStatus(
+    is_vpn_active=False, interface="en0", gateway="192.168.1.1",
+    summary_fa="", summary_en="", warning_fa="", warning_en="",
+)
 
 
 class TestFeaturedCountries(unittest.TestCase):
@@ -20,10 +27,28 @@ class TestFeaturedCountries(unittest.TestCase):
         self.test_settings_file = os.path.join(self.test_dir, "user_settings.json")
         ui.DEFAULT_USER_SETTINGS_FILE = self.test_settings_file
 
+        # The app reads and writes relative files (scan_cache.json, surfshark_servers.json),
+        # so run inside the temp dir. Its background monitor would otherwise call pgrep,
+        # read the live Shadowrocket UI and write ServerManager, so it is not started here.
+        # VPN state and the Shadowrocket storage path are fixed for the same reason.
+        self.cwd = os.getcwd()
+        os.chdir(self.test_dir)
+        self._patches = [
+            patch.object(SurfsharkAmneziaApp, "_start_background_monitors", lambda self: None),
+            patch.object(ui, "detect_active_vpn", return_value=_NO_VPN),
+            patch.object(ui, "is_shadowrocket_running", return_value=False),
+            patch.object(ShadowrocketStorage, "DEFAULT_STORAGE_PATH", os.path.join(self.test_dir, "ServerManager")),
+        ]
+        for p in self._patches:
+            p.start()
+
         self.mock_page = MagicMock()
         self.app = SurfsharkAmneziaApp(self.mock_page)
 
     def tearDown(self):
+        for p in reversed(self._patches):
+            p.stop()
+        os.chdir(self.cwd)
         ui.DEFAULT_USER_SETTINGS_FILE = self.orig_settings_file
         shutil.rmtree(self.test_dir, ignore_errors=True)
 

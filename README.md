@@ -102,23 +102,39 @@ To run resolution and testing directly from the command line:
 python3 main.py --cli-scan --export-zip
 ```
 
-### 4. Phone Version (Mobile UI on your local network)
-Runs the same scanner with a phone-sized UI and does **not** depend on Shadowrocket (no `wg://` links, no Shadowrocket storage):
+### 4. Run the Tests on a Mac (Python 3.11)
+The tests use Python 3.11 and the pinned `flet==0.28.3` from `requirements.txt`. Flet 1.x changed APIs the desktop UI relies on, so do not upgrade it.
+```bash
+brew install python@3.11          # once
+./scripts/mac_test.sh             # creates .venv, installs requirements, runs all tests
+```
+Or by hand, from the project folder:
+```bash
+python3.11 -m venv .venv && source .venv/bin/activate
+python -m pip install -r requirements.txt
+python -m unittest -v
+```
+The last line must report `OK` with a non-zero test count (about 110). The tests write only to temp folders and never read or change Shadowrocket.
+
+### 5. Phone Version (Mobile UI on your local network)
+Runs the same scanner with a phone-sized UI. It never controls Shadowrocket (no Shadowrocket storage, no app control), but it copies `wg://` links that you paste into Shadowrocket on iPhone. Both copy formats are always available:
 ```bash
 python3 main.py --mobile            # or: ./run.sh --mobile
 python3 main.py --mobile --port 9000
 ```
 1. The terminal prints a link like `http://<LAN-IP>:8550/?t=<token>`. Open it on the phone while it is on the same Wi-Fi or hotspot.
-2. The token is required for every phone. Anyone who has the link can copy your WireGuard key, so do not share it. Restarting the app creates a new token.
-3. The computer itself can open `http://127.0.0.1:8550/` without a token.
+2. The token is required for every visitor, including this computer. Anyone who has the link can copy your WireGuard key, so do not share it. Restarting the app creates a new token.
+3. The page uses plain HTTP, so use it only on your home Wi-Fi or your own hotspot, never on public Wi-Fi.
 
 Phone screens:
-- **Servers**: working IPs grouped by country. Each row has **copy** (one config) and **QR / text** (view the config and scan it). Check rows, or use "select whole country", then tap the selection button for:
-  - **Copy queue**: copies one config at a time. The AmneziaWG app imports one config per paste, so tap *Next* after each import.
+- **Servers**: working IPs grouped by country. Each row has **copy** (AmneziaWG config), **link** (`wg://` for Shadowrocket) and **QR / text** (view the config and scan it). Check rows, or use "select whole country", then tap the selection button for:
+  - **Copy queue**: copies one config (or one `wg://` link) at a time. The AmneziaWG app imports one config per paste, and Shadowrocket takes one link per paste, so tap *Next* after each import.
   - **Combined text**: all selected configs in one block, each with a numbered separator.
+  - **wg:// links**: all selected links, one per line (the same format as the desktop "Copy wg:// Links").
   - **Endpoint list**: `country - city | IP:port | latency` lines.
 - **Scan**: DoH resolution plus UDP 51820 probing with a live log. Turn VPN off first.
-- **Settings**: obfuscation preset, PrivateKey entry, and data reload.
+- **Guide**: step-by-step instructions in Persian and English, covering both copy formats, group copy, testing in a real client, key safety and common problems.
+- **Settings**: obfuscation preset, PrivateKey entry and data reload. The PrivateKey is kept in memory only: it is never written to disk by the phone UI, so enter it again after a restart.
 
 Clipboard access in a phone browser over plain HTTP can be blocked by the browser. If copy does not work, open the config view and long-press the text to copy it manually.
 
@@ -129,7 +145,9 @@ Clipboard access in a phone browser over plain HTTP can be blocked by the browse
 - `main.py`: Application entrypoint (Desktop GUI or headless CLI scanner).
 - `ui.py`: Flet-based desktop GUI with metrics, tree views, QR codes, and dialogs.
 - `mobile_app.py`: Phone-sized Flet UI served with `--mobile` (no Shadowrocket integration).
-- `mobile_core.py`: Flet-free logic for the phone version: config and group copy formats, copy queue, headless scan, and token check.
+- `mobile_core.py`: Flet-free logic for the phone version: config, `wg://` link and group copy formats, copy queue, headless scan, and token check.
+- `mobile_guide.py`: the phone guide text in Persian and English, with a parity check that the two languages have the same structure.
+- `scripts/mac_test.sh`: creates a Python 3.11 venv and runs the test suite (macOS).
 - `dns_resolver.py`: Anti-poisoning DoH multi-provider resolver and round-robin IP discovery.
 - `checker.py`: Concurrent UDP port 51820 reachability and RTT latency checker.
 - `config_builder.py`: AmneziaWG config generator, QR code encoder, and ZIP batch packager.

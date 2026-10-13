@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import base64
 import json
+import logging
 import os
 import re
 import threading
@@ -14,6 +15,8 @@ import time
 from typing import Dict, List, Optional
 
 import flet as ft
+
+logger = logging.getLogger("SurfsharkAmneziaStudio")
 
 # Compatibility aliases across Flet versions (0.23 through 0.28+)
 if not hasattr(ft, "icons") and hasattr(ft, "Icons"):

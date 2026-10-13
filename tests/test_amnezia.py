@@ -274,8 +274,13 @@ class TestBrowserHarvestAndBlueprint(unittest.TestCase):
 
 class TestVpnDetector(unittest.TestCase):
     def test_vpn_detection_structure(self):
+        # Route output is mocked so the result does not depend on the live VPN state of the machine.
+        from unittest.mock import patch
         from vpn_detector import detect_active_vpn, VpnStatus
-        status = detect_active_vpn()
+        with patch("vpn_detector.platform.system", return_value="Linux"), \
+                patch("vpn_detector.subprocess.check_output",
+                      return_value="default via 192.168.1.1 dev eth0 proto dhcp metric 100\n"):
+            status = detect_active_vpn()
         self.assertIsInstance(status, VpnStatus)
         self.assertIsInstance(status.is_vpn_active, bool)
         self.assertIsInstance(status.interface, str)
@@ -512,10 +517,14 @@ class TestV3ScanCacheAndTop5(unittest.TestCase):
 
     def test_save_and_load_scan_cache(self):
         import os
+        import shutil
+        import tempfile
         from scan_cache import save_scan_cache, load_scan_cache
         from checker import CheckResult
 
-        test_file = "test_cache_temp.json"
+        # Write into a temp dir, not the working directory (a relative path would land in the project folder).
+        test_dir = tempfile.mkdtemp(prefix="test_scan_cache_")
+        test_file = os.path.join(test_dir, "test_cache_temp.json")
         try:
             mock_results = {
                 "de-ber.prod.surfshark.com": [
@@ -544,8 +553,7 @@ class TestV3ScanCacheAndTop5(unittest.TestCase):
             self.assertEqual(loaded["working_count"], 1)
             self.assertEqual(loaded["top_5"][0]["city"], "Berlin")
         finally:
-            if os.path.exists(test_file):
-                os.remove(test_file)
+            shutil.rmtree(test_dir, ignore_errors=True)
 
     def test_v3_config_builder_header(self):
         from config_builder import build_amnezia_config, AmneziaParams

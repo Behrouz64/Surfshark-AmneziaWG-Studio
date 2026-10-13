@@ -5,14 +5,17 @@ Everything the phone UI needs lives here so it can be unit-tested without a
 browser or a Flet page:
   - Endpoint model built from the last scan cache (working IPs only).
   - AmneziaWG config text for one endpoint, a group of endpoints, or an
-    endpoint list (the three copy formats).
+    endpoint list (the copy formats).
+  - wg:// links for Shadowrocket (iPhone), one per endpoint or one per line for
+    a group. The link comes from config_builder.build_shadowrocket_wg_url, the
+    same builder the desktop app uses, so both produce identical links.
   - CopyQueue: walks a selection one config at a time, because the Amnezia
     mobile app imports one config per paste.
   - run_mobile_scan: headless DoH resolution + UDP 51820 reachability scan.
   - Access-token check for the browser UI served on the local network.
 
-This module does NOT reference Shadowrocket in any form (no wg:// links, no
-ServerManager storage, no pbcopy). Those stay in the desktop ui.py only.
+This module never touches Shadowrocket itself: no ServerManager storage, no
+app control, no pbcopy. It only builds text. Those stay in the desktop ui.py.
 """
 
 from __future__ import annotations
@@ -24,7 +27,13 @@ from typing import Callable, Dict, Iterable, List, Optional, Sequence, Tuple
 
 from browser_harvest import BlueprintData, UserInterfaceConfig, is_placeholder_key
 from checker import CheckResult, ScanMode, run_udp_scan_sync
-from config_builder import AmneziaParams, build_amnezia_config, country_code_to_flag, is_valid_wg_key
+from config_builder import (
+    AmneziaParams,
+    build_amnezia_config,
+    build_shadowrocket_wg_url,
+    country_code_to_flag,
+    is_valid_wg_key,
+)
 from dns_resolver import resolve_servers_sync
 from scan_cache import DEFAULT_SCAN_CACHE_FILE, save_scan_cache
 
@@ -150,6 +159,36 @@ def build_endpoint_config(endpoint: Endpoint, ui: UserInterfaceConfig, params: A
         amnezia_params=params,
         tunnel_name=endpoint.tunnel_name,
     )
+
+
+def _wg_user_interface(ui: UserInterfaceConfig) -> dict:
+    """The wg:// builder takes plain dicts; these defaults match the .conf builder."""
+    return {
+        "private_key": ui.private_key or "",
+        "address": ui.address or DEFAULT_ADDRESS,
+        "dns": ui.dns or DEFAULT_DNS,
+    }
+
+
+def build_endpoint_wg_link(endpoint: Endpoint, ui: UserInterfaceConfig, params: AmneziaParams) -> str:
+    """One wg:// link for Shadowrocket. Paste it into Shadowrocket to add this server."""
+    server_info = {
+        "endpoint_ip": endpoint.ip,
+        "port": endpoint.port,
+        "hostname": endpoint.hostname,
+        "public_key": endpoint.public_key,
+        "country": endpoint.country,
+        "country_code": endpoint.country_code,
+        "city": endpoint.city,
+        "latency_ms": endpoint.latency_ms if endpoint.has_latency else None,
+        "is_domain": False,
+    }
+    return build_shadowrocket_wg_url(server_info, _wg_user_interface(ui), params)
+
+
+def build_group_wg_links_text(endpoints: Sequence[Endpoint], ui: UserInterfaceConfig, params: AmneziaParams) -> str:
+    """One wg:// link per line, the same format the desktop 'Copy wg:// Links' button produces."""
+    return "\n".join(build_endpoint_wg_link(endpoint, ui, params) for endpoint in endpoints)
 
 
 def build_group_config_text(endpoints: Sequence[Endpoint], ui: UserInterfaceConfig, params: AmneziaParams) -> str:

@@ -4,13 +4,15 @@ mobile_app.py: Phone-friendly Flet UI for Surfshark AmneziaWG Studio.
 Start it with `python3 main.py --mobile`. The app is served over the local
 network, so the phone's browser can open it (the URL with its access token is
 printed at startup). All logic comes from mobile_core.py; this file only builds
-the screens. It has no Shadowrocket integration.
+the screens. Both copy formats are always available: the AmneziaWG config and
+the wg:// link for Shadowrocket. The app never talks to Shadowrocket itself.
 
 Screens (bottom navigation):
-  - سرورها: working endpoints grouped by country, with single copy, config/QR
-    view, multi-select and the group copy actions.
+  - سرورها: working endpoints grouped by country. Each row has copy-config,
+    copy-wg:// link and QR/text. Multi-select gives the group actions for both
+    formats (queue, combined text, wg:// lines, endpoint list).
   - اسکن: headless DoH + UDP scan with a live log.
-  - تنظیمات: obfuscation preset, PrivateKey and data reload.
+  - تنظیمات: obfuscation preset, PrivateKey, data reload. The help guide is its own tab.
 """
 
 from __future__ import annotations
@@ -22,7 +24,7 @@ from typing import Callable, List, Optional
 
 import flet as ft
 
-from browser_harvest import DEFAULT_DATA_FILE, BlueprintData, is_placeholder_key, load_blueprint, save_blueprint
+from browser_harvest import DEFAULT_DATA_FILE, BlueprintData, is_placeholder_key, load_blueprint
 from config_builder import country_code_to_flag, generate_qr_code_base64, is_valid_wg_key
 from mobile_core import (
     DEFAULT_PRESET,
@@ -31,7 +33,9 @@ from mobile_core import (
     Endpoint,
     build_endpoint_config,
     build_endpoint_list_text,
+    build_endpoint_wg_link,
     build_group_config_text,
+    build_group_wg_links_text,
     endpoints_from_working_configs,
     group_by_country,
     has_usable_private_key,
@@ -40,6 +44,7 @@ from mobile_core import (
     run_mobile_scan,
 )
 from scan_cache import DEFAULT_SCAN_CACHE_FILE, load_scan_cache
+from mobile_guide import DEFAULT_GUIDE_LANGUAGE, GUIDE_LANGUAGE_NAMES, GUIDE_LANGUAGES, guide_sections
 from vpn_detector import VpnStatus, detect_active_vpn
 
 logger = logging.getLogger("SurfsharkAmneziaMobile")
@@ -57,7 +62,10 @@ MONO = "monospace"
 PROGRESS_THROTTLE_S = 0.3
 MAX_LOG_LINES = 300
 SHOWN_LOG_LINES = 200
-LOCAL_CLIENT_IPS = ("127.0.0.1", "::1", "localhost")
+
+# Copy formats. Both are always offered; the mode only decides what a queue step copies.
+COPY_MODE_CONFIG = "config"  # AmneziaWG .conf text (Amnezia app)
+COPY_MODE_WG = "wg"          # wg:// link (Shadowrocket on iPhone)
 
 
 def _latency_color(latency_ms: float) -> str:
@@ -123,6 +131,7 @@ class MobileStudioApp:
             destinations=[
                 ft.NavigationBarDestination(icon=ft.Icons.CLOUD_OUTLINED, selected_icon=ft.Icons.CLOUD_ROUNDED, label="سرورها"),
                 ft.NavigationBarDestination(icon=ft.Icons.RADAR, label="اسکن"),
+                ft.NavigationBarDestination(icon=ft.Icons.MENU_BOOK_ROUNDED, label="راهنما"),
                 ft.NavigationBarDestination(icon=ft.Icons.TUNE, label="تنظیمات"),
             ],
         )
@@ -144,7 +153,7 @@ class MobileStudioApp:
 
     def _show_tab(self, index: int):
         self.current_tab = index
-        views = [self.servers_view, self.scan_view, self.settings_view]
+        views = [self.servers_view, self.scan_view, self.guide_view, self.settings_view]
         self.host.content = views[index]
         self.page.navigation_bar.selected_index = index
         self._refresh_fab()
@@ -204,6 +213,12 @@ class MobileStudioApp:
 
     def _config_text(self, endpoint: Endpoint) -> str:
         return build_endpoint_config(endpoint, self.blueprint.user_interface, self._params())
+
+    def _wg_text(self, endpoint: Endpoint) -> str:
+        return build_endpoint_wg_link(endpoint, self.blueprint.user_interface, self._params())
+
+    def _text_for_mode(self, endpoint: Endpoint, mode: str) -> str:
+        return self._wg_text(endpoint) if mode == COPY_MODE_WG else self._config_text(endpoint)
 
     def _selected_endpoints(self) -> List[Endpoint]:
         return [e for e in self.endpoints if e.key in self.selected]
@@ -366,9 +381,66 @@ class MobileStudioApp:
             ],
         )
 
+        self.guide_view = self._build_guide_view()
         self._render_servers()
         self._render_scan_state()
         self._render_settings()
+
+    def _build_guide_view(self) -> ft.Column:
+        self.guide_language: str = DEFAULT_GUIDE_LANGUAGE
+        self.guide_body = ft.Column(spacing=10)
+        self.guide_buttons = {
+            code: ft.ElevatedButton(
+                GUIDE_LANGUAGE_NAMES[code],
+                on_click=lambda e, c=code: self._set_guide_language(c),
+            )
+            for code in GUIDE_LANGUAGES
+        }
+        view = ft.Column(
+            expand=True,
+            scroll=ft.ScrollMode.AUTO,
+            spacing=12,
+            controls=[
+                ft.Text("راهنما", size=20, weight=ft.FontWeight.BOLD),
+                ft.Row(spacing=8, controls=list(self.guide_buttons.values())),
+                self.guide_body,
+                ft.Container(height=72),
+            ],
+        )
+        self._render_guide()
+        return view
+
+    def _set_guide_language(self, code: str):
+        self.guide_language = code
+        self._render_guide()
+        self._update()
+
+    def _render_guide(self):
+        controls: List[ft.Control] = []
+        for section in guide_sections(self.guide_language):
+            controls.append(ft.Text(section["title"], weight=ft.FontWeight.BOLD, size=14))
+            for kind, value in section["blocks"]:
+                controls.append(self._guide_block(kind, value))
+        self.guide_body.controls = controls
+        for code, button in self.guide_buttons.items():
+            button.disabled = code == self.guide_language  # the active language is shown as pressed
+
+    def _guide_block(self, kind: str, value) -> ft.Control:
+        if kind == "p":
+            return ft.Text(value, size=13, color=MUTED)
+        if kind == "note":
+            return ft.Container(
+                bgcolor=WARN_BG,
+                border_radius=10,
+                padding=10,
+                content=ft.Text(value, size=12, color=WARN),
+            )
+        if kind == "ol":
+            rows = [ft.Text(f"{n}. {text}", size=13, color=MUTED) for n, text in enumerate(value, start=1)]
+        else:
+            rows = [ft.Text(f"• {text}", size=13, color=MUTED) for text in value]
+        return ft.Column(spacing=6, controls=rows)
+
 
     def _banner(self, text: str, bgcolor: str, color: str) -> ft.Container:
         return ft.Container(
@@ -482,8 +554,13 @@ class MobileStudioApp:
                     ),
                     ft.IconButton(
                         icon=ft.Icons.CONTENT_COPY_ROUNDED,
-                        tooltip="کپی این کانفیگ",
+                        tooltip="کپی کانفیگ AmneziaWG",
                         on_click=lambda e, x=ep: self._with_private_key(lambda: self._copy_single(x)),
+                    ),
+                    ft.IconButton(
+                        icon=ft.Icons.LINK_ROUNDED,
+                        tooltip="کپی لینک wg:// برای Shadowrocket",
+                        on_click=lambda e, x=ep: self._with_private_key(lambda: self._copy_single_wg(x)),
                     ),
                     ft.IconButton(
                         icon=ft.Icons.QR_CODE_ROUNDED,
@@ -515,11 +592,15 @@ class MobileStudioApp:
     def _copy_single(self, ep: Endpoint):
         self._copy(self._config_text(ep), f"کانفیگ {ep.city} کپی شد")
 
+    def _copy_single_wg(self, ep: Endpoint):
+        self._copy(self._wg_text(ep), f"لینک wg:// {ep.city} کپی شد")
+
     # ------------------------------------------------------------------
     # Single config dialog (text + QR)
     # ------------------------------------------------------------------
     def _open_config_dialog(self, ep: Endpoint):
         text = self._config_text(ep)
+        wg_text = self._wg_text(ep)
         content: List[ft.Control] = [
             ft.Text(ep.tunnel_name, weight=ft.FontWeight.BOLD),
             ft.Text("متن کانفیگ (برای انتخاب دستی لمس طولانی کنید):", size=12, color=MUTED),
@@ -554,6 +635,11 @@ class MobileStudioApp:
                     icon=ft.Icons.CONTENT_COPY_ROUNDED,
                     on_click=lambda e: self._copy(text, f"کانفیگ {ep.city} کپی شد"),
                 ),
+                ft.OutlinedButton(
+                    "کپی wg://",
+                    icon=ft.Icons.LINK_ROUNDED,
+                    on_click=lambda e: self._copy(wg_text, f"لینک wg:// {ep.city} کپی شد"),
+                ),
             ],
         )
         self._open_control(dialog)
@@ -578,19 +664,30 @@ class MobileStudioApp:
                     spacing=10,
                     controls=[
                         ft.Text(
-                            "اپ AmneziaWG هر بار یک کانفیگ را وارد می‌کند. «صف کپی» را برای این کار استفاده کنید.",
+                            "اپ AmneziaWG و Shadowrocket هر بار یک کانفیگ یا لینک وارد می‌کنند. "
+                            "برای این کار «صف کپی» را استفاده کنید.",
                             size=12,
                             color=MUTED,
                         ),
                         ft.ElevatedButton(
-                            "صف کپی: یکی‌یکی برای وارد کردن",
+                            "صف کپی کانفیگ: یکی‌یکی برای AmneziaWG",
                             icon=ft.Icons.SKIP_NEXT_ROUNDED,
-                            on_click=lambda e: self._start_queue(dialog, items),
+                            on_click=lambda e: self._start_queue(dialog, items, mode=COPY_MODE_CONFIG),
+                        ),
+                        ft.ElevatedButton(
+                            "صف کپی لینک wg://: یکی‌یکی برای Shadowrocket",
+                            icon=ft.Icons.LINK_ROUNDED,
+                            on_click=lambda e: self._start_queue(dialog, items, mode=COPY_MODE_WG),
                         ),
                         ft.OutlinedButton(
                             "کپی متن ترکیبی همه کانفیگ‌ها",
                             icon=ft.Icons.CONTENT_COPY_ROUNDED,
                             on_click=lambda e: self._copy_group(dialog, items),
+                        ),
+                        ft.OutlinedButton(
+                            "کپی همه لینک‌های wg:// (هر خط یک لینک)",
+                            icon=ft.Icons.COPY_ALL_ROUNDED,
+                            on_click=lambda e: self._copy_group_wg(dialog, items),
                         ),
                         ft.OutlinedButton(
                             "کپی لیست کشور، شهر و آی‌پی",
@@ -614,6 +711,11 @@ class MobileStudioApp:
         text = build_group_config_text(items, self.blueprint.user_interface, self._params())
         self._copy(text, f"{len(items)} کانفیگ به‌صورت متن ترکیبی کپی شد")
 
+    def _copy_group_wg(self, dialog, items: List[Endpoint]):
+        self._close_control(dialog)
+        text = build_group_wg_links_text(items, self.blueprint.user_interface, self._params())
+        self._copy(text, f"{len(items)} لینک wg:// کپی شد (هر خط یک لینک)")
+
     def _copy_endpoint_list(self, dialog, items: List[Endpoint]):
         self._close_control(dialog)
         self._copy(build_endpoint_list_text(items), f"لیست {len(items)} آی‌پی کپی شد")
@@ -625,26 +727,32 @@ class MobileStudioApp:
         self._refresh_fab()
         self._update()
 
-    def _start_queue(self, parent_dialog, items: List[Endpoint]):
+    def _start_queue(self, parent_dialog, items: List[Endpoint], mode: str = COPY_MODE_CONFIG):
         self._close_control(parent_dialog)
         queue = CopyQueue(items)
+        is_wg = mode == COPY_MODE_WG
+        noun = "لینک" if is_wg else "کانفیگ"
         info = ft.Text(size=14, weight=ft.FontWeight.BOLD)
         hint = ft.Text(
-            "۱) کانفیگ کپی می‌شود.\n"
-            "۲) در اپ AmneziaWG تونل جدید را از متن وارد کنید.\n"
-            "۳) برگردید و «بعدی» را بزنید.",
+            f"۱) {noun} کپی می‌شود.\n"
+            + (
+                "۲) در Shadowrocket سرور جدید را از کلیپ‌بورد وارد کنید.\n"
+                if is_wg else
+                "۲) در اپ AmneziaWG تونل جدید را از متن وارد کنید.\n"
+            )
+            + "۳) برگردید و «بعدی» را بزنید.",
             size=12,
             color=MUTED,
         )
 
         def _refresh_info():
             current = queue.current
-            info.value = f"کانفیگ {queue.position} از {queue.total}\n{current.tunnel_name if current else ''}"
+            info.value = f"{noun} {queue.position} از {queue.total}\n{current.tunnel_name if current else ''}"
 
         def _copy_current(e=None):
             current = queue.current
             if current:
-                self._copy(self._config_text(current), f"کانفیگ {queue.position} از {queue.total} کپی شد")
+                self._copy(self._text_for_mode(current, mode), f"{noun} {queue.position} از {queue.total} کپی شد")
 
         def _next(e):
             if queue.advance():
@@ -686,16 +794,10 @@ class MobileStudioApp:
                 self._update()
                 return
             self.blueprint.user_interface.private_key = key
-            try:
-                save_blueprint(self.blueprint, DEFAULT_DATA_FILE)
-            except OSError as err:
-                error_text.value = f"ذخیره نشد: {err}"
-                self._update()
-                return
             self._close_control(dialog)
             self._refresh_banners()
             self._render_settings()
-            self._toast("PrivateKey ذخیره شد")
+            self._toast("PrivateKey فقط در همین اجرا ثبت شد")
             self._update()
             if on_saved:
                 on_saved()
@@ -710,7 +812,7 @@ class MobileStudioApp:
                     controls=[
                         ft.Text(
                             "کلید خصوصی WireGuard حساب Surfshark خود را وارد کنید. "
-                            "فقط در فایل surfshark_servers.json روی همین سیستم ذخیره می‌شود.",
+                            "فقط در همین اجرای برنامه نگه داشته می‌شود و روی دیسک نوشته نمی‌شود.",
                             size=12,
                             color=MUTED,
                         ),
@@ -827,6 +929,7 @@ class MobileStudioApp:
         label = PRESETS[self.preset_key][0]
         self._toast(f"پروفایل فعال: {label}")
 
+
     def _render_settings(self):
         key_ok = has_usable_private_key(self.blueprint.user_interface)
         self.key_status.value = "✅ ثبت شده" if key_ok else "❌ ثبت نشده"
@@ -863,8 +966,6 @@ def _query_token(page: ft.Page) -> Optional[str]:
 
 
 def _is_authorized(page: ft.Page, token: str) -> bool:
-    # The computer running the app is trusted; phones on the LAN must present the token.
-    client_ip = getattr(page, "client_ip", None) or ""
-    if client_ip in LOCAL_CLIENT_IPS:
-        return True
+    # Every visitor needs the token, this computer included. Trusting an IP is not safe:
+    # a relay on the same machine makes remote traffic look like 127.0.0.1.
     return is_access_token_valid(_query_token(page), token)

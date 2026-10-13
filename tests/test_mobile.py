@@ -1,10 +1,11 @@
 """
 test_mobile.py: Unit tests for the phone-friendly UI (mobile_core + mobile_app).
 
-Covers the copy formats (single, group text, endpoint list), the one-at-a-time
-copy queue, the headless scan path (network calls mocked), the access token,
-handler-level behaviour of the phone UI against a mock Flet page, and a guard
-that the mobile version does not depend on Shadowrocket.
+Covers the copy formats (AmneziaWG config, wg:// links, group text, endpoint list),
+the one-at-a-time copy queue for both formats, the headless scan path (network
+calls mocked), the access token, the help guide, handler-level behaviour of the
+phone UI against a mock Flet page, and a guard that the phone code never touches
+Shadowrocket itself (it only builds wg:// link text).
 """
 
 import ast
@@ -14,6 +15,7 @@ import shutil
 import sys
 import tempfile
 import unittest
+import urllib.parse
 from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
@@ -22,7 +24,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 import flet as ft
 
 import mobile_core
-from browser_harvest import DEFAULT_DATA_FILE, BlueprintData, ServerMetadata, UserInterfaceConfig, load_blueprint
+from browser_harvest import DEFAULT_DATA_FILE, BlueprintData, ServerMetadata, UserInterfaceConfig
 from checker import CheckResult
 from config_builder import AmneziaParams
 from dns_resolver import ResolvedEndpoint
@@ -30,7 +32,9 @@ from mobile_core import (
     CopyQueue,
     build_endpoint_config,
     build_endpoint_list_text,
+    build_endpoint_wg_link,
     build_group_config_text,
+    build_group_wg_links_text,
     endpoints_from_working_configs,
     group_by_country,
     has_usable_private_key,
@@ -137,6 +141,36 @@ class TestCopyFormats(unittest.TestCase):
         text = build_endpoint_config(ep, _ui(), self.params)
         self.assertIn("YOUR_SERVER_PUBLIC_KEY", text)
 
+    def test_wg_link_has_shadowrocket_fields_and_no_cidr_mask(self):
+        link = build_endpoint_wg_link(self.endpoints[0], _ui(), self.params)
+        self.assertTrue(link.startswith("wg://185.1.1.1:51820?"))
+        self.assertIn("privateKey=" + urllib.parse.quote(REAL_KEY), link)
+        self.assertIn("publicKey=" + urllib.parse.quote(SERVER_KEY), link)
+        self.assertIn("ip=10.14.0.2&", link)  # /16 removed, as Shadowrocket expects
+        self.assertIn("obfs=amneziawg", link)
+        self.assertIn("obfsParam=", link)
+        self.assertIn("#", link)  # title fragment
+
+    def test_wg_link_uses_desktop_builder_output(self):
+        from config_builder import build_shadowrocket_wg_url
+        ep = self.endpoints[1]
+        expected = build_shadowrocket_wg_url(
+            {
+                "endpoint_ip": ep.ip, "port": ep.port, "hostname": ep.hostname, "public_key": ep.public_key,
+                "country": ep.country, "country_code": ep.country_code, "city": ep.city,
+                "latency_ms": ep.latency_ms, "is_domain": False,
+            },
+            {"private_key": REAL_KEY, "address": "10.14.0.2/16", "dns": "162.252.172.57"},
+            self.params,
+        )
+        self.assertEqual(build_endpoint_wg_link(ep, _ui(), self.params), expected)
+
+    def test_group_wg_links_are_one_per_line(self):
+        lines = build_group_wg_links_text(self.endpoints, _ui(), self.params).splitlines()
+        self.assertEqual(len(lines), 2)
+        self.assertTrue(lines[0].startswith("wg://185.1.1.1:51820?"))
+        self.assertTrue(lines[1].startswith("wg://185.1.1.2:51820?"))
+
 
 class TestCopyQueue(unittest.TestCase):
     def test_walks_items_in_order_and_stops_at_end(self):
@@ -233,6 +267,8 @@ class TestHeadlessScan(unittest.TestCase):
 
         cache = load_scan_cache(self.cache_path)
         self.assertIsNotNone(cache)
+        with open(self.cache_path, encoding="utf-8") as f:
+            self.assertNotIn(REAL_KEY, f.read(), "the scan cache must never hold the PrivateKey")
         endpoints = endpoints_from_working_configs(cache["working_configs"])
         self.assertEqual({e.ip for e in endpoints}, {"185.1.1.1", "185.1.1.2"})
         self.assertEqual(endpoints[0].country_code, "DE")
@@ -250,13 +286,18 @@ class TestHeadlessScan(unittest.TestCase):
 
 class TestShadowrocketIsolation(unittest.TestCase):
     """
-    The phone version must not depend on Shadowrocket. The check walks the AST so it
-    looks at identifiers, imports and string literals only; docstrings and comments
-    are ignored, so a sentence that explains the rule does not trip it.
+    The phone version may build wg:// link text (Shadowrocket's import format), but it
+    must never touch Shadowrocket: no ServerManager storage, no process checks, no app
+    control, no shadowrocket:// URL scheme. The check walks the AST so it looks at
+    identifiers, imports and string literals only; docstrings and comments are ignored.
     """
 
-    FORBIDDEN = ("shadowrocket", "wg://", "pbcopy", "servermanager")
-    FORBIDDEN_MODULES = ("ui",)  # the desktop Flet screen module
+    FORBIDDEN = (
+        "shadowrocketstorage", "servermanager", "shadowrocket://", "pbcopy", "osascript",
+        "get_shadowrocket_pid", "is_shadowrocket_running", "read_shadowrocket", "inject_servers",
+        "pgrep",
+    )
+    FORBIDDEN_MODULES = ("ui", "subprocess")  # the desktop Flet screen module, and process control
 
     def _code_tokens(self, name: str):
         with open(os.path.join(REPO_ROOT, name), encoding="utf-8") as f:
@@ -320,11 +361,18 @@ class TestMobileUiWithMockPage(unittest.TestCase):
     """Exercises the phone UI's handlers against a mock Flet page; no browser needed."""
 
     def setUp(self):
+        import mobile_app
+
         self.cwd = os.getcwd()
         self.tmp = tempfile.mkdtemp()
         os.chdir(self.tmp)  # keep the real scan cache / blueprint out of the test run
+        # The phone UI reads the live VPN state at startup. Fix it so the result does not
+        # depend on the VPN state of the machine running the tests.
+        self._vpn_patch = patch.object(mobile_app, "_safe_vpn_status", return_value=None)
+        self._vpn_patch.start()
 
     def tearDown(self):
+        self._vpn_patch.stop()
         os.chdir(self.cwd)
         shutil.rmtree(self.tmp, ignore_errors=True)
 
@@ -353,7 +401,7 @@ class TestMobileUiWithMockPage(unittest.TestCase):
     def test_builds_screens_and_switches_tabs(self):
         app, page = self._app()
         self.assertEqual(app.current_tab, 0)
-        self.assertEqual(len(page.navigation_bar.destinations), 3)
+        self.assertEqual(len(page.navigation_bar.destinations), 4)
         self.assertEqual(len(app.country_list.controls), 2)  # Germany and Albania
 
         app._toggle(app.endpoints[0].key, True)
@@ -364,6 +412,8 @@ class TestMobileUiWithMockPage(unittest.TestCase):
         self.assertFalse(app.fab.visible)
         app._show_tab(2)
         self.assertEqual(app.current_tab, 2)
+        app._show_tab(3)
+        self.assertEqual(app.current_tab, 3)
 
     def test_country_tile_remembers_collapsed_state(self):
         app, _ = self._app()
@@ -424,9 +474,95 @@ class TestMobileUiWithMockPage(unittest.TestCase):
         self.assertIn("Endpoint = 185.1.1.2:51820", copied)
         self.assertIn(f"PrivateKey = {REAL_KEY}", copied)
 
-    def test_key_dialog_rejects_bad_key_then_saves_good_key(self):
+    def test_single_config_dialog_offers_wg_link_as_second_mode(self):
+        app, page = self._app()
+        app._open_config_dialog(app.endpoints[1])
+        dialog = self._last_dialog(page)
+        self.assertEqual(len(dialog.actions), 3)  # close, config, wg link
+        dialog.actions[2].on_click(None)
+        copied = page.set_clipboard.call_args[0][0]
+        self.assertTrue(copied.startswith("wg://185.1.1.2:51820?"))
+        self.assertNotIn("[Interface]", copied)
+
+    def test_single_wg_copy_puts_link_on_clipboard(self):
+        app, page = self._app()
+        app._with_private_key(lambda: app._copy_single_wg(app.endpoints[0]))
+        copied = page.set_clipboard.call_args[0][0]
+        self.assertTrue(copied.startswith("wg://185.1.1.1:51820?"))
+
+    def test_group_wg_copy_puts_one_link_per_line_on_clipboard(self):
+        app, page = self._app()
+        app._copy_group_wg(MagicMock(), app.endpoints[:2])
+        copied = page.set_clipboard.call_args[0][0]
+        lines = copied.splitlines()
+        self.assertEqual(len(lines), 2)
+        self.assertTrue(all(line.startswith("wg://") for line in lines))
+
+    def test_copy_queue_wg_mode_copies_links_one_by_one(self):
+        app, page = self._app()
+        app._start_queue(MagicMock(), app.endpoints[:2], mode="wg")
+        self.assertTrue(page.set_clipboard.call_args[0][0].startswith("wg://185.1.1.1:"))
+        queue_dialog = self._last_dialog(page)
+        queue_dialog.actions[1].on_click(None)  # "بعدی"
+        self.assertEqual(page.set_clipboard.call_count, 2)
+        self.assertTrue(page.set_clipboard.call_args[0][0].startswith("wg://185.1.1.2:"))
+
+    def test_group_actions_offer_both_copy_modes(self):
+        app, page = self._app()
+        app.selected = {app.endpoints[0].key, app.endpoints[1].key}
+        app._open_group_actions()
+        dialog = self._last_dialog(page)
+        labels = []
+        for control in dialog.content.content.controls:
+            if isinstance(control, (ft.ElevatedButton, ft.OutlinedButton)):
+                labels.append(control.text)
+        joined = " | ".join(str(label) for label in labels)
+        self.assertIn("AmneziaWG", joined)
+        self.assertIn("wg://", joined)
+        self.assertEqual(len(labels), 5)
+
+    def test_guide_tab_switches_language_and_disables_active_button(self):
+        app, page = self._app()
+        app._show_tab(2)
+        self.assertIs(app.host.content, app.guide_view)
+        self.assertEqual(app.guide_language, "fa")
+        app._set_guide_language("en")
+        titles = [getattr(c, "value", "") for c in app.guide_body.controls]
+        self.assertIn("What this version does", titles)
+        self.assertTrue(app.guide_buttons["en"].disabled)
+        self.assertFalse(app.guide_buttons["fa"].disabled)
+
+    def test_guide_is_bilingual_and_covers_both_copy_modes(self):
+        from mobile_guide import check_guide_parity, guide_sections
+
+        self.assertEqual(check_guide_parity(), [])
+        for lang in ("fa", "en"):
+            parts = []
+            for section in guide_sections(lang):
+                parts.append(section["title"])
+                for _kind, value in section["blocks"]:
+                    parts.extend([value] if isinstance(value, str) else value)
+            text = "\n".join(parts)
+            self.assertIn("AmneziaWG", text, lang)
+            self.assertIn("wg://", text, lang)
+            self.assertIn("Shadowrocket", text, lang)
+            self.assertIn("PrivateKey", text, lang)
+
+    def test_guide_parity_check_reports_mismatch(self):
+        import mobile_guide
+
+        original = mobile_guide.GUIDE["en"]
+        try:
+            mobile_guide.GUIDE["en"] = original[:-1]
+            self.assertTrue(mobile_guide.check_guide_parity())
+        finally:
+            mobile_guide.GUIDE["en"] = original
+
+    def test_key_dialog_rejects_bad_key_then_keeps_good_key_in_memory_only(self):
         app, page = self._app()
         app.blueprint.user_interface.private_key = ""
+        with open(DEFAULT_DATA_FILE, "w", encoding="utf-8") as f:
+            f.write('{"sentinel": true}')
         saved_callback = MagicMock()
         app._open_key_dialog(on_saved=saved_callback)
         dialog = self._last_dialog(page)
@@ -442,8 +578,9 @@ class TestMobileUiWithMockPage(unittest.TestCase):
         save_button.on_click(None)
         saved_callback.assert_called_once()
         self.assertTrue(has_usable_private_key(app.blueprint.user_interface))
-        stored = load_blueprint(DEFAULT_DATA_FILE)
-        self.assertEqual(stored.user_interface.private_key, REAL_KEY)
+        # The phone UI must not write the private key to disk: the data file is byte-for-byte unchanged.
+        with open(DEFAULT_DATA_FILE, encoding="utf-8") as f:
+            self.assertEqual(f.read(), '{"sentinel": true}')
 
     def test_copy_requires_key_first(self):
         app, page = self._app()
@@ -487,7 +624,8 @@ class TestTokenGate(unittest.TestCase):
         self.assertFalse(mobile_app._is_authorized(_fake_page("192.168.1.20", {}), "tok"))  # bare URL: no crash
         self.assertTrue(mobile_app._is_authorized(_fake_page("192.168.1.20", {"t": "tok"}), "tok"))
         self.assertFalse(mobile_app._is_authorized(_fake_page("192.168.1.20", {"t": "nope"}), "tok"))
-        self.assertTrue(mobile_app._is_authorized(_fake_page("127.0.0.1", {}), "tok"))
+        self.assertFalse(mobile_app._is_authorized(_fake_page("127.0.0.1", {}), "tok"))  # local needs the token too
+        self.assertTrue(mobile_app._is_authorized(_fake_page("127.0.0.1", {"t": "tok"}), "tok"))
         self.assertFalse(mobile_app._is_authorized(_fake_page(None, {}), "tok"))
 
     def test_unauthorized_visitor_gets_denied_page_not_an_error(self):

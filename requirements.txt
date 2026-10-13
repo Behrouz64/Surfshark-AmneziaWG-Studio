@@ -1,5 +1,5 @@
 # Desktop GUI Framework
-flet>=0.23.0
+flet==0.28.3
 
 # Browser Automation for Attended Login & Cluster Harvesting
 playwright>=1.44.0

@@ -176,8 +176,9 @@ def run_mobile(port: int = 8550):
     print(" Surfshark AmneziaWG Studio — Mobile UI")
     print("=" * 65)
     print(f" Phone (same Wi-Fi/hotspot): http://{lan_ip}:{port}/?t={token}")
-    print(f" This computer:              http://127.0.0.1:{port}/")
-    print(" Keep this link private: it grants access to your WireGuard key.")
+    print(f" This computer:              http://127.0.0.1:{port}/?t={token}")
+    print(" Keep these links private: they grant access to your WireGuard key.")
+    print(" The page uses plain HTTP. Use it only on your home Wi-Fi or your own hotspot.")
     print("=" * 65)
 
     # view=None serves the page without opening a browser window; the printed links are used instead.

@@ -7,6 +7,7 @@ import sys
 import shutil
 import tempfile
 import unittest
+from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
@@ -15,6 +16,16 @@ from vpn_detector import detect_active_vpn, VpnStatus
 from browser_harvest import ServerMetadata, BlueprintData
 from checker import CheckResult
 from ui import SurfsharkAmneziaApp
+
+
+class _InlineThread:
+    """Runs the worker when start() is called, so the test does not depend on thread timing."""
+
+    def __init__(self, target=None, daemon=None, **_kwargs):
+        self._target = target
+
+    def start(self):
+        self._target()
 
 
 class TestLiveSync(unittest.TestCase):
@@ -26,13 +37,27 @@ class TestLiveSync(unittest.TestCase):
         shutil.rmtree(self.test_dir, ignore_errors=True)
 
     def test_detect_active_vpn_structure(self):
-        """Verify detect_active_vpn returns valid VpnStatus with non-empty descriptions."""
-        status = detect_active_vpn()
+        """Verify detect_active_vpn returns valid VpnStatus with non-empty descriptions.
+        The route output is mocked so the result does not depend on the machine's live VPN."""
+        with patch("vpn_detector.platform.system", return_value="Linux"), \
+                patch("vpn_detector.subprocess.check_output",
+                      return_value="default via 192.168.1.1 dev eth0 proto dhcp metric 100\n"):
+            status = detect_active_vpn()
         self.assertIsInstance(status, VpnStatus)
         self.assertIsInstance(status.is_vpn_active, bool)
-        self.assertIsInstance(status.interface, str)
+        self.assertFalse(status.is_vpn_active)
+        self.assertEqual(status.interface, "eth0")
         self.assertTrue(len(status.summary_fa) > 0)
         self.assertTrue(len(status.summary_en) > 0)
+
+    def test_tunnel_default_route_is_reported_as_vpn(self):
+        """A default route through utun (macOS VPN tunnel) must be reported as an active VPN."""
+        route_out = "   route to: default\n    gateway: 10.8.0.1\n  interface: utun3\n"
+        with patch("vpn_detector.platform.system", return_value="Darwin"), \
+                patch("vpn_detector.subprocess.check_output", return_value=route_out):
+            status = detect_active_vpn()
+        self.assertTrue(status.is_vpn_active)
+        self.assertEqual(status.interface, "utun3")
 
     def test_apply_shadowrocket_results_logic(self):
         """Verify _apply_shadowrocket_results parses results and updates cache and state."""
@@ -122,8 +147,8 @@ class TestLiveSync(unittest.TestCase):
 
     @patch("ui.read_shadowrocket_test_results")
     def test_sync_results_from_shadowrocket_async(self, mock_read_results):
-        """Verify _sync_results_from_shadowrocket executes in background thread without blocking."""
-        import time
+        """Verify _sync_results_from_shadowrocket runs its worker and resets the sync flags.
+        The worker runs inline (no sleep), so the mocked reader is still active when it runs."""
         mock_read_results.return_value = {
             "198.44.139.75": {
                 "ping": 150,
@@ -138,9 +163,8 @@ class TestLiveSync(unittest.TestCase):
         app._apply_shadowrocket_results = MagicMock(return_value=1)
         app._show_toast = MagicMock()
 
-        app._sync_results_from_shadowrocket()
-        # Wait briefly for worker thread to complete
-        time.sleep(0.15)
+        with patch("ui.threading", SimpleNamespace(Thread=_InlineThread)):
+            app._sync_results_from_shadowrocket()
 
         app._apply_shadowrocket_results.assert_called_once()
         self.assertFalse(getattr(app, "_is_syncing_sr", True))

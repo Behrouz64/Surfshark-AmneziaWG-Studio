@@ -407,14 +407,17 @@ class TestShadowrocketExport(unittest.TestCase):
         self.assertTrue(res_after["194.26.29.115"]["is_reachable"])
 
     def test_get_shadowrocket_pid_and_running(self):
+        # pgrep is mocked: the result must not depend on whether Shadowrocket is open on this machine.
+        from unittest.mock import MagicMock, patch
         from config_builder import get_shadowrocket_pid, is_shadowrocket_running
-        pid = get_shadowrocket_pid()
-        is_running = is_shadowrocket_running()
-        if pid:
-            self.assertTrue(is_running)
+        with patch("config_builder.subprocess.run", return_value=MagicMock(stdout="", returncode=1)):
+            self.assertIsNone(get_shadowrocket_pid())
+            self.assertFalse(is_shadowrocket_running())
+        with patch("config_builder.subprocess.run", return_value=MagicMock(stdout="4242\n", returncode=0)):
+            pid = get_shadowrocket_pid()
+            self.assertEqual(pid, 4242)
             self.assertIsInstance(pid, int)
-        else:
-            self.assertFalse(is_running)
+            self.assertTrue(is_shadowrocket_running())
 
     def test_ax_label_ping_parsing_logic(self):
         """
