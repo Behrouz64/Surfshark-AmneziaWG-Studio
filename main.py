@@ -8,6 +8,7 @@ Usage:
   python3 main.py               # Launches Desktop GUI (Flet)
   python3 main.py --cli-scan    # Runs DoH resolution and UDP reachability scan from terminal
   python3 main.py --export-zip  # Directly exports all valid configs to a ZIP file
+  python3 main.py --mobile      # Serves the phone-friendly UI on the LAN (open the printed URL on the phone)
 """
 
 from __future__ import annotations
@@ -141,6 +142,53 @@ def run_cli_scan(output_zip: bool = False, force: bool = False):
         print(f"[+] Successfully exported {len(working_configs)} configs to: {os.path.abspath(zip_name)}")
 
 
+def _guess_lan_ip() -> str:
+    """Returns the address this machine uses on the local network (no packets are sent)."""
+    import socket
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
+            sock.connect(("10.255.255.255", 1))
+            return sock.getsockname()[0]
+    except OSError:
+        return "127.0.0.1"
+
+
+def run_mobile(port: int = 8550):
+    """
+    Serves the phone-friendly UI over the local network. Requests from other machines must
+    carry the random token printed here (?t=...), because the page can copy WireGuard keys.
+    Requests from this computer (127.0.0.1) do not need it.
+    """
+    import functools
+    import secrets
+
+    try:
+        import flet as ft
+        from mobile_app import main as mobile_main
+    except ImportError as e:
+        print(f"[!] Could not start the mobile UI: {e}")
+        print("[!] Please ensure dependencies are installed: pip install -r requirements.txt")
+        sys.exit(1)
+
+    token = secrets.token_urlsafe(16)
+    lan_ip = _guess_lan_ip()
+    print("=" * 65)
+    print(" Surfshark AmneziaWG Studio — Mobile UI")
+    print("=" * 65)
+    print(f" Phone (same Wi-Fi/hotspot): http://{lan_ip}:{port}/?t={token}")
+    print(f" This computer:              http://127.0.0.1:{port}/")
+    print(" Keep this link private: it grants access to your WireGuard key.")
+    print("=" * 65)
+
+    # view=None serves the page without opening a browser window; the printed links are used instead.
+    ft.app(
+        target=functools.partial(mobile_main, token=token),
+        view=None,
+        host="0.0.0.0",
+        port=port,
+    )
+
+
 def run_gui():
     """Launches the modern Flet GUI."""
     try:
@@ -188,9 +236,13 @@ if __name__ == "__main__":
     parser.add_argument("--cli-scan", action="store_true", help="Run DNS resolution and UDP reachability scan in CLI mode")
     parser.add_argument("--export-zip", action="store_true", help="Export valid configs to a ZIP archive during CLI scan")
     parser.add_argument("--force", "--ignore-vpn", action="store_true", help="Bypass active VPN warning prompt in CLI mode")
+    parser.add_argument("--mobile", action="store_true", help="Serve the phone-friendly UI on the local network")
+    parser.add_argument("--port", type=int, default=8550, help="Port for --mobile (default 8550)")
     args = parser.parse_args()
 
     if args.cli_scan or args.export_zip:
         run_cli_scan(output_zip=args.export_zip, force=args.force)
+    elif args.mobile:
+        run_mobile(port=args.port)
     else:
         run_gui()

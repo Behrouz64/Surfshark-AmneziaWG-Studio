@@ -102,12 +102,34 @@ To run resolution and testing directly from the command line:
 python3 main.py --cli-scan --export-zip
 ```
 
+### 4. Phone Version (Mobile UI on your local network)
+Runs the same scanner with a phone-sized UI and does **not** depend on Shadowrocket (no `wg://` links, no Shadowrocket storage):
+```bash
+python3 main.py --mobile            # or: ./run.sh --mobile
+python3 main.py --mobile --port 9000
+```
+1. The terminal prints a link like `http://<LAN-IP>:8550/?t=<token>`. Open it on the phone while it is on the same Wi-Fi or hotspot.
+2. The token is required for every phone. Anyone who has the link can copy your WireGuard key, so do not share it. Restarting the app creates a new token.
+3. The computer itself can open `http://127.0.0.1:8550/` without a token.
+
+Phone screens:
+- **Servers**: working IPs grouped by country. Each row has **copy** (one config) and **QR / text** (view the config and scan it). Check rows, or use "select whole country", then tap the selection button for:
+  - **Copy queue**: copies one config at a time. The AmneziaWG app imports one config per paste, so tap *Next* after each import.
+  - **Combined text**: all selected configs in one block, each with a numbered separator.
+  - **Endpoint list**: `country - city | IP:port | latency` lines.
+- **Scan**: DoH resolution plus UDP 51820 probing with a live log. Turn VPN off first.
+- **Settings**: obfuscation preset, PrivateKey entry, and data reload.
+
+Clipboard access in a phone browser over plain HTTP can be blocked by the browser. If copy does not work, open the config view and long-press the text to copy it manually.
+
 ---
 
 ## File Structure
 
 - `main.py`: Application entrypoint (Desktop GUI or headless CLI scanner).
 - `ui.py`: Flet-based desktop GUI with metrics, tree views, QR codes, and dialogs.
+- `mobile_app.py`: Phone-sized Flet UI served with `--mobile` (no Shadowrocket integration).
+- `mobile_core.py`: Flet-free logic for the phone version: config and group copy formats, copy queue, headless scan, and token check.
 - `dns_resolver.py`: Anti-poisoning DoH multi-provider resolver and round-robin IP discovery.
 - `checker.py`: Concurrent UDP port 51820 reachability and RTT latency checker.
 - `config_builder.py`: AmneziaWG config generator, QR code encoder, and ZIP batch packager.
