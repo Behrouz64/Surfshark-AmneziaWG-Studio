@@ -173,7 +173,7 @@ It copies a group of links, reads them back, and checks each line against the re
 The phone version can also run on the iPhone itself, without a computer. The app scans from the iPhone's own connection.
 
 **Build the IPA on GitHub (no Mac needed for this step):**
-1. Make a commit whose message contains `[build]` (for example `Build for testing [build]`) and push the branch. Normal pushes do not start a build.
+1. Make a commit whose message starts with `[build]` (for example `[build] Test the phone copy`) and push the branch. Normal pushes do not start a build.
 2. In the Actions tab, open the run **Build iOS IPA (unsigned)** for that commit. When it is green, download the artifact `surfshark-ios-unsigned` (it contains `SurfsharkAmneziaWG-unsigned.ipa`).
 
 **Install it with a free Apple ID (Sideloadly, on a Mac or Windows PC):**
