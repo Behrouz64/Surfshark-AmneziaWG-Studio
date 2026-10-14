@@ -791,13 +791,21 @@ class TestPersianText(unittest.TestCase):
         self.assertTrue(all(line.startswith("wg://") for line in lines))
 
 
+# A fake 32-byte key (bytes 0..31 in base64). Real keys must never be committed.
+TEST_KEY = "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8="
+
+
 class TestShadowrocketReferenceLinks(unittest.TestCase):
     """The phone's wg:// links must match this reference export byte for byte."""
 
     REFERENCE = [
-        "wg://195.86.6.249:51820?publicKey=9h4WUC/U%2BWnr58UAqZCitc5Cl0nf3D9IzFQMT4IsmUk%3D&privateKey=cF4B4RXTVug8PI2%2BmDxm8f1G/Ro0NHuWeO6jyOWRp18%3D&ip=10.2.0.2&dns=10.2.0.1%2C%202a07%3Ab944%3A%3A2%3A1&mtu=1280&udp=1&keepalive=25&obfs=amneziawg&obfsParam=%7B%22jc%22%3A%224%22%2C%22jmin%22%3A%2250%22%2C%22jmax%22%3A%221000%22%2C%22s1%22%3A%220%22%2C%22s2%22%3A%220%22%2C%22h1%22%3A%221%22%2C%22h2%22%3A%222%22%2C%22h3%22%3A%223%22%2C%22h4%22%3A%224%22%7D#%F0%9F%A6%88%20%F0%9F%87%AE%F0%9F%87%B9%20Italy%20%E2%80%94%20Milan%20%28195.86.6.249%29",
-        "wg://149.22.91.161:51820?publicKey=4D4PkMrszUx3%2BRj4qLZIH1r7s6VAjS28sl34VG5%2BJyE%3D&privateKey=cF4B4RXTVug8PI2%2BmDxm8f1G/Ro0NHuWeO6jyOWRp18%3D&ip=10.2.0.2&dns=10.2.0.1%2C%202a07%3Ab944%3A%3A2%3A1&mtu=1280&udp=1&keepalive=25&obfs=amneziawg&obfsParam=%7B%22jc%22%3A%224%22%2C%22jmin%22%3A%2250%22%2C%22jmax%22%3A%221000%22%2C%22s1%22%3A%220%22%2C%22s2%22%3A%220%22%2C%22h1%22%3A%221%22%2C%22h2%22%3A%222%22%2C%22h3%22%3A%223%22%2C%22h4%22%3A%224%22%7D#%F0%9F%A6%88%20%F0%9F%87%AE%F0%9F%87%B9%20Italy%20%E2%80%94%20Palermo%20%28149.22.91.161%29",
+        "wg://195.86.6.249:51820?publicKey=9h4WUC/U%2BWnr58UAqZCitc5Cl0nf3D9IzFQMT4IsmUk%3D&privateKey=TEST_KEY_QUOTED&ip=10.2.0.2&dns=10.2.0.1%2C%202a07%3Ab944%3A%3A2%3A1&mtu=1280&udp=1&keepalive=25&obfs=amneziawg&obfsParam=%7B%22jc%22%3A%224%22%2C%22jmin%22%3A%2250%22%2C%22jmax%22%3A%221000%22%2C%22s1%22%3A%220%22%2C%22s2%22%3A%220%22%2C%22h1%22%3A%221%22%2C%22h2%22%3A%222%22%2C%22h3%22%3A%223%22%2C%22h4%22%3A%224%22%7D#%F0%9F%A6%88%20%F0%9F%87%AE%F0%9F%87%B9%20Italy%20%E2%80%94%20Milan%20%28195.86.6.249%29",
+        "wg://149.22.91.161:51820?publicKey=4D4PkMrszUx3%2BRj4qLZIH1r7s6VAjS28sl34VG5%2BJyE%3D&privateKey=TEST_KEY_QUOTED&ip=10.2.0.2&dns=10.2.0.1%2C%202a07%3Ab944%3A%3A2%3A1&mtu=1280&udp=1&keepalive=25&obfs=amneziawg&obfsParam=%7B%22jc%22%3A%224%22%2C%22jmin%22%3A%2250%22%2C%22jmax%22%3A%221000%22%2C%22s1%22%3A%220%22%2C%22s2%22%3A%220%22%2C%22h1%22%3A%221%22%2C%22h2%22%3A%222%22%2C%22h3%22%3A%223%22%2C%22h4%22%3A%224%22%7D#%F0%9F%A6%88%20%F0%9F%87%AE%F0%9F%87%B9%20Italy%20%E2%80%94%20Palermo%20%28149.22.91.161%29",
     ]
+
+    def _reference(self):
+        import urllib.parse
+        return [link.replace("TEST_KEY_QUOTED", urllib.parse.quote(TEST_KEY)) for link in self.REFERENCE]
 
     def _endpoints(self, latency=0.0):
         from mobile_core import Endpoint
@@ -812,26 +820,26 @@ class TestShadowrocketReferenceLinks(unittest.TestCase):
 
     def _ui(self):
         from browser_harvest import UserInterfaceConfig
-        return UserInterfaceConfig(private_key="cF4B4RXTVug8PI2+mDxm8f1G/Ro0NHuWeO6jyOWRp18=",
+        return UserInterfaceConfig(private_key=TEST_KEY,
                                    address="10.2.0.2/32", dns="10.2.0.1, 2a07:b944::2:1")
 
     def test_each_link_matches_the_reference_export(self):
         from mobile_core import build_endpoint_wg_link
         from config_builder import AmneziaParams
-        for endpoint, reference in zip(self._endpoints(), self.REFERENCE):
+        for endpoint, reference in zip(self._endpoints(), self._reference()):
             self.assertEqual(build_endpoint_wg_link(endpoint, self._ui(), AmneziaParams.iran_preset()), reference)
 
     def test_group_text_is_the_reference_lines_joined_by_newlines(self):
         from mobile_core import build_group_wg_links_text
         from config_builder import AmneziaParams
         text = build_group_wg_links_text(self._endpoints(), self._ui(), AmneziaParams.iran_preset())
-        self.assertEqual(text, "\n".join(self.REFERENCE))
+        self.assertEqual(text, "\n".join(self._reference()))
 
     def test_measured_ping_does_not_change_the_title(self):
         from mobile_core import build_endpoint_wg_link
         from config_builder import AmneziaParams
         link = build_endpoint_wg_link(self._endpoints(latency=120.0)[0], self._ui(), AmneziaParams.iran_preset())
-        self.assertEqual(link, self.REFERENCE[0])
+        self.assertEqual(link, self._reference()[0])
 
 
 class TestGuideMatchesUi(unittest.TestCase):

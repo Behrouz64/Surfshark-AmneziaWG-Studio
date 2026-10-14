@@ -27,3 +27,6 @@ phone/surfshark_servers.json
 phone/build/
 phone/build
 phone/assets/
+
+# Written by scripts/mac_copy_check.py: contains the PrivateKey
+copy_check_links.txt
