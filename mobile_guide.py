@@ -25,7 +25,7 @@ GUIDE: Dict[str, List[Section]] = {
             "title": "این نسخه چه کاری می‌کند",
             "blocks": [
                 ("p", "این نسخه‌ی گوشی سرورهای Surfshark را اسکن می‌کند، سرعت هر سرور را با پینگ می‌سنجد و سریع‌ترین‌ها را نشان می‌دهد. برای هر سرور می‌توانید کانفیگ AmneziaWG یا لینک wg:// بگیرید."),
-                ("p", "برنامه روی کامپیوتر اجرا می‌شود و از گوشی، با همان Wi-Fi یا هات‌اسپات، باز می‌شود. اسکن از اینترنت همان کامپیوتر انجام می‌شود."),
+                ("p", "نسخه‌ی نصب‌شده روی گوشی (IPA یا APK) مستقل است و به کامپیوتر نیاز ندارد. اسکن از اینترنت خود گوشی انجام می‌شود. اگر نسخه‌ی کامپیوتر را در شبکه‌ی محلی باز می‌کنید، برنامه روی کامپیوتر اجرا می‌شود و از گوشی با همان Wi-Fi باز می‌شود."),
                 ("note", "«پینگ» یعنی زمانی که یک پیام کوچک لازم دارد تا به سرور برسد و برگردد. عدد کمتر یعنی سرور سریع‌تر."),
             ],
         },
@@ -35,8 +35,8 @@ GUIDE: Dict[str, List[Section]] = {
                 ("ol", [
                     "VPN را کاملاً خاموش کنید. اگر VPN روشن باشد، پینگ‌ها واقعی نیستند.",
                     "کلید PrivateKey اکانت Surfshark خود را (۴۴ کاراکتر) آماده کنید. بدون آن کپی کانفیگ کار نمی‌کند.",
-                    "کامپیوتر و گوشی را به یک Wi-Fi یا هات‌اسپات وصل کنید.",
-                    "این نسخه با HTTP ساده کار می‌کند. فقط در Wi-Fi خانگی یا هات‌اسپات شخصی خودتان استفاده کنید، نه در Wi-Fi عمومی.",
+                    "اگر نسخه‌ی کامپیوتر را استفاده می‌کنید، کامپیوتر و گوشی را به یک Wi-Fi یا هات‌اسپات وصل کنید.",
+                    "نسخه‌ی کامپیوتر با HTTP ساده کار می‌کند. فقط در Wi-Fi خانگی یا هات‌اسپات شخصی خودتان استفاده کنید، نه در Wi-Fi عمومی.",
                 ]),
             ],
         },
@@ -44,8 +44,7 @@ GUIDE: Dict[str, List[Section]] = {
             "title": "مراحل کار",
             "blocks": [
                 ("ol", [
-                    "روی کامپیوتر دستور python3 main.py --mobile را اجرا کنید. آدرسی شبیه http://<IP>:8550/?t=... چاپ می‌شود.",
-                    "همان آدرس کامل (با ?t=...) را در مرورگر گوشی باز کنید.",
+                    "برنامه‌ی نصب‌شده را روی گوشی باز کنید. اگر از نسخه‌ی کامپیوتر استفاده می‌کنید: python3 main.py --mobile را اجرا کنید و آدرس کامل را در گوشی باز کنید.",
                     "در تب «تنظیمات» کلید PrivateKey را وارد کنید.",
                     "در تب «اسکن» با VPN خاموش، اسکن را بزنید. تا پایان اسکن صبر کنید.",
                     "در تب «سرورها» سرورهای سالم را بر اساس کشور ببینید.",
@@ -115,7 +114,7 @@ GUIDE: Dict[str, List[Section]] = {
             "title": "What this version does",
             "blocks": [
                 ("p", "The phone version scans Surfshark servers, measures each server's ping, and shows the fastest first. For each server you can copy an AmneziaWG config or a wg:// link."),
-                ("p", "The app runs on your computer and you open it on your phone over the same Wi-Fi or hotspot. The scan runs from the computer's internet connection."),
+                ("p", "The installed app (IPA or APK) is standalone and needs no computer. The scan runs from the phone's own connection. If you open the computer version over the local network, it runs on the computer and you open it on the phone over the same Wi-Fi."),
                 ("note", "Ping is the time a small message needs to reach the server and come back. A lower number means a faster server."),
             ],
         },
@@ -125,8 +124,8 @@ GUIDE: Dict[str, List[Section]] = {
                 ("ol", [
                     "Turn your VPN fully OFF. While a VPN is on, the pings are not real.",
                     "Have your Surfshark WireGuard PrivateKey ready (44 characters). Copying a config does not work without it.",
-                    "Connect the computer and the phone to the same Wi-Fi or hotspot.",
-                    "This version uses plain HTTP. Use it only on your home Wi-Fi or your own hotspot, never on public Wi-Fi.",
+                    "If you use the computer version, connect the computer and the phone to the same Wi-Fi or hotspot.",
+                    "The computer version uses plain HTTP. Use it only on your home Wi-Fi or your own hotspot, never on public Wi-Fi.",
                 ]),
             ],
         },
@@ -134,8 +133,7 @@ GUIDE: Dict[str, List[Section]] = {
             "title": "Steps",
             "blocks": [
                 ("ol", [
-                    "On the computer, run python3 main.py --mobile. It prints an address like http://<IP>:8550/?t=...",
-                    "Open that full address (with ?t=...) in the phone's browser.",
+                    "Open the installed app on the phone. If you use the computer version: run python3 main.py --mobile and open the full address on the phone.",
                     "In the Settings tab, enter your PrivateKey.",
                     "In the Scan tab, with the VPN off, tap scan and wait for it to finish.",
                     "In the Servers tab, see the working servers grouped by country.",
