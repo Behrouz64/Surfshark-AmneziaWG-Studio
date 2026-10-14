@@ -170,20 +170,28 @@ class MobileStudioApp:
             on_click=self._open_group_actions,
         )
         page.floating_action_button = self.fab
-        page.appbar = ft.AppBar(
-            leading=ft.Icon(ft.Icons.SHIELD_ROUNDED, color=ACCENT, size=26),
-            leading_width=48,
-            title=ft.Column(spacing=0, tight=True, controls=[
-                ft.Text("Surfshark AmneziaWG Studio", size=16, weight=ft.FontWeight.BOLD),
-                ft.Text("نسخه‌ی گوشی", size=11, color=MUTED),
-            ]),
-            center_title=False,
-            bgcolor=CARD,
-            actions=[ft.IconButton(icon=ft.Icons.REFRESH_ROUNDED, tooltip="بارگذاری مجدد", on_click=self._reload_all)],
-        )
 
         self.host = ft.Container(expand=True, padding=ft.padding.symmetric(horizontal=14, vertical=12))
-        page.add(ft.SafeArea(content=self.host, expand=True))
+        # The header lives inside SafeArea with the content, so it never sits under the status bar.
+        self.header = ft.Container(
+            bgcolor=CARD,
+            padding=ft.padding.symmetric(horizontal=14, vertical=10),
+            content=ft.Row(
+                vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                controls=[
+                    ft.Icon(ft.Icons.SHIELD_ROUNDED, color=ACCENT, size=26),
+                    ft.Column(expand=True, spacing=0, tight=True, controls=[
+                        ft.Text("Surfshark AmneziaWG Studio", size=16, weight=ft.FontWeight.BOLD),
+                        ft.Text("نسخه‌ی گوشی", size=11, color=MUTED),
+                    ]),
+                    ft.IconButton(icon=ft.Icons.REFRESH_ROUNDED, tooltip="بارگذاری مجدد", on_click=self._reload_all),
+                ],
+            ),
+        )
+        page.add(ft.SafeArea(
+            content=ft.Column(spacing=0, expand=True, controls=[self.header, self.host]),
+            expand=True,
+        ))
 
     def _on_nav(self, e):
         self._show_tab(int(e.control.selected_index))

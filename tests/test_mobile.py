@@ -600,7 +600,8 @@ class TestMobileUiWithMockPage(unittest.TestCase):
 
     def test_dashboard_tiles_and_appbar(self):
         app, page = self._app()
-        self.assertIsInstance(page.appbar, ft.AppBar)
+        self.assertIsInstance(app.header, ft.Container)
+        self.assertIsInstance(page.add.call_args_list[0].args[0], ft.SafeArea)  # header inside SafeArea
         tiles = app.dashboard_row.controls
         self.assertEqual(len(tiles), 5)
         self.assertEqual(tiles[0].content.controls[1].value, "3")  # healthy endpoints in _app()
