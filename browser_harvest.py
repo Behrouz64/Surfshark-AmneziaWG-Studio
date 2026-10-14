@@ -473,7 +473,7 @@ def run_attended_browser_harvest(
                             priv_match = re.search(r'(?:Private\s*Key|private_key)[\s:=]+([A-Za-z0-9+/]{43}=)', content, re.IGNORECASE)
                             if priv_match:
                                 blueprint.user_interface.private_key = priv_match.group(1)
-                                log(f"Extracted User PrivateKey: {blueprint.user_interface.private_key[:8]}...")
+                                log("Extracted User PrivateKey from the page (value not shown)")
 
                             # Check text fields
                             inputs = page.locator("input").all()
@@ -483,7 +483,7 @@ def run_attended_browser_harvest(
                                     if re.match(r'^[A-Za-z0-9+/]{43}=$', val):
                                         if not blueprint.user_interface.private_key:
                                             blueprint.user_interface.private_key = val
-                                            log(f"Extracted PrivateKey from page input field: {val[:8]}...")
+                                            log("Extracted PrivateKey from a page input field (value not shown)")
                                 except Exception:
                                     pass
                         except Exception as e:

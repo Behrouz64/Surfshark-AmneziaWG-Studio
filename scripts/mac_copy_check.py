@@ -97,6 +97,20 @@ def check_wg_link(link: str, private_key: str) -> List[str]:
     return problems
 
 
+def check_against_builder(link: str, endpoint, ui, params, private_key: str) -> List[str]:
+    """
+    The format check, plus an exact comparison with what the app's builder makes for this endpoint.
+    The format check alone cannot see a wrong title, DNS, obfsParam value or publicKey.
+    """
+    from mobile_core import build_endpoint_wg_link
+
+    problems = check_wg_link(link, private_key)
+    expected = build_endpoint_wg_link(endpoint, ui, params)
+    if link != expected:
+        problems.append("differs from the app's own builder output for this server")
+    return problems
+
+
 def copy_roundtrip(text: str, copy_cmd: Sequence[str], paste_cmd: Sequence[str]) -> Tuple[bool, str]:
     """Puts text on the clipboard with copy_cmd, reads it back with paste_cmd and compares."""
     copied = subprocess.run(list(copy_cmd), input=text.encode("utf-8"), capture_output=True)
@@ -146,18 +160,18 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     ui, endpoints, params, key = _load_inputs(max(1, args.count), args.key)
     group_text = build_group_wg_links_text(endpoints, ui, params)
     single_text = build_endpoint_wg_link(endpoints[0], ui, params)
+    single_problems = check_against_builder(single_text, endpoints[0], ui, params, key)
 
     failures = 0
     print(f"Checking {len(endpoints)} links, the way the phone's group copy builds them:")
     for number, (endpoint, link) in enumerate(zip(endpoints, group_text.split("\n")), start=1):
-        problems = check_wg_link(link, key)
+        problems = check_against_builder(link, endpoint, ui, params, key)
         status = "OK " if not problems else "BAD"
         print(f"  [{status}] {number}. {endpoint.country} — {endpoint.city} ({endpoint.ip})")
         for problem in problems:
             print(f"        - {problem}")
         failures += bool(problems)
 
-    single_problems = check_wg_link(single_text, key)
     print(f"  [{'OK ' if not single_problems else 'BAD'}] single copy: {endpoints[0].ip}")
     failures += bool(single_problems)
 

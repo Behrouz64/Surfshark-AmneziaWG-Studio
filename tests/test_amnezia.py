@@ -365,7 +365,7 @@ class TestV2IsValidWgKey(unittest.TestCase):
         valid_keys = [
             "l8EOWPyzt/njrb74CADY4VOhns/TbUN6KFTbytHcFQw=",
             "AQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQE=",
-            "eIAi8RMy6+QScRWERt/+jEedxdqro4FFJO9A8L3ptGU=",
+            "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8=",
         ]
         for key in valid_keys:
             self.assertTrue(self.is_valid_wg_key(key), f"Should be valid: {key}")
@@ -464,7 +464,7 @@ class TestV2ConfigBuilderWarnings(unittest.TestCase):
     def test_warning_added_for_invalid_server_key(self):
         from config_builder import build_amnezia_config, AmneziaParams
         conf = build_amnezia_config(
-            client_private_key="eIAi8RMy6+QScRWERt/+jEedxdqro4FFJO9A8L3ptGU=",
+            client_private_key="AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8=",
             client_address="10.14.0.2/16",
             client_dns="162.252.172.57",
             server_public_key="FAKEKEY",
@@ -477,7 +477,7 @@ class TestV2ConfigBuilderWarnings(unittest.TestCase):
     def test_no_warning_for_valid_keys(self):
         from config_builder import build_amnezia_config, AmneziaParams
         conf = build_amnezia_config(
-            client_private_key="eIAi8RMy6+QScRWERt/+jEedxdqro4FFJO9A8L3ptGU=",
+            client_private_key="AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8=",
             client_address="10.14.0.2/16",
             client_dns="162.252.172.57",
             server_public_key="l8EOWPyzt/njrb74CADY4VOhns/TbUN6KFTbytHcFQw=",
@@ -558,7 +558,7 @@ class TestV3ScanCacheAndTop5(unittest.TestCase):
     def test_v3_config_builder_header(self):
         from config_builder import build_amnezia_config, AmneziaParams
         conf = build_amnezia_config(
-            client_private_key="eIAi8RMy6+QScRWERt/+jEedxdqro4FFJO9A8L3ptGU=",
+            client_private_key="AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8=",
             client_address="10.14.0.2/16",
             client_dns="162.252.172.57",
             server_public_key="l8EOWPyzt/njrb74CADY4VOhns/TbUN6KFTbytHcFQw=",
@@ -633,7 +633,7 @@ class TestV3VerificationModesAndDeepScreening(unittest.TestCase):
         mock_sock = MagicMock()
         mock_sock.recvfrom.side_effect = socket.timeout("timed out")
 
-        real_client_key = "eIAi8RMy6+QScRWERt/+jEedxdqro4FFJO9A8L3ptGU="
+        real_client_key = "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8="
         real_server_key = "l8EOWPyzt/njrb74CADY4VOhns/TbUN6KFTbytHcFQw="
 
         with patch("socket.socket", return_value=mock_sock):
@@ -780,7 +780,7 @@ class TestV3TargetedScansAndSmartScreening(unittest.TestCase):
         mock_sock = MagicMock()
         mock_sock.recvfrom.side_effect = socket.timeout("timed out")
 
-        real_priv = "eIAi8RMy6+QScRWERt/+jEedxdqro4FFJO9A8L3ptGU="
+        real_priv = "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8="
         real_pub = "l8EOWPyzt/njrb74CADY4VOhns/TbUN6KFTbytHcFQw="
 
         with patch("socket.socket", return_value=mock_sock):

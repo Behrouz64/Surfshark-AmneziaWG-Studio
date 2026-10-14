@@ -292,7 +292,11 @@ class MobileStudioApp:
         self.selected &= {e.key for e in self.endpoints}
 
     def _reload_all(self, e=None):
+        # The key typed in this session is memory-only: a reload must not drop it.
+        session_key = self.blueprint.user_interface.private_key if has_usable_private_key(self.blueprint.user_interface) else ""
         self.blueprint = load_blueprint(DEFAULT_DATA_FILE)
+        if session_key and not has_usable_private_key(self.blueprint.user_interface):
+            self.blueprint.user_interface.private_key = session_key
         self.continent_map = continent_by_country_code(self.blueprint.servers)
         self._load_cache()
         self.vpn = None if self.is_mobile else _safe_vpn_status()
