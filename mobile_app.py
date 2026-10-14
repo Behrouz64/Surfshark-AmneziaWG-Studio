@@ -23,11 +23,15 @@ import time
 from typing import Callable, Dict, List, Optional
 
 import flet as ft
+import flet.canvas as cv
 
 from browser_harvest import DEFAULT_DATA_FILE, BlueprintData, is_placeholder_key, load_blueprint
-from config_builder import country_code_to_flag, generate_qr_code_base64, is_valid_wg_key
+from config_builder import country_code_to_flag, is_valid_wg_key
 from mobile_core import (
     ANY_CONTINENT,
+    qr_available,
+    qr_dark_runs,
+    qr_matrix,
     is_mobile_platform,
     continent_by_country_code,
     continents_present,
@@ -72,6 +76,19 @@ SHOWN_LOG_LINES = 200
 # Copy formats. Both are always offered; the mode only decides what a queue step copies.
 COPY_MODE_CONFIG = "config"  # AmneziaWG .conf text (Amnezia app)
 COPY_MODE_WG = "wg"          # wg:// link (Shadowrocket on iPhone)
+
+
+QR_SIDE_PX = 240
+
+
+def _qr_canvas(matrix, side: int = QR_SIDE_PX) -> ft.Control:
+    """Draws the QR code with canvas rectangles. No image library is needed, so it works on phones."""
+    cell, runs = qr_dark_runs(matrix, side)
+    dark = ft.Paint(color="#000000", style=ft.PaintingStyle.FILL)
+    background = ft.Paint(color="#FFFFFF", style=ft.PaintingStyle.FILL)
+    shapes = [cv.Rect(0, 0, side, side, paint=background)]
+    shapes += [cv.Rect(x, y, width, cell, paint=dark) for x, y, width in runs]
+    return cv.Canvas(shapes=shapes, width=side, height=side)
 
 
 def _latency_color(latency_ms: float) -> str:
@@ -720,9 +737,8 @@ class MobileStudioApp:
                 ),
             ),
         ]
-        qr_b64 = generate_qr_code_base64(text)
-        if qr_b64:
-            content.append(ft.Image(src_base64=qr_b64, width=220, height=220, fit=ft.ImageFit.CONTAIN))
+        if qr_available():
+            content.append(_qr_canvas(qr_matrix(text)))
         else:
             content.append(ft.Text("QR در دسترس نیست (کتابخانه qrcode نصب نیست).", size=12, color=ERROR))
 

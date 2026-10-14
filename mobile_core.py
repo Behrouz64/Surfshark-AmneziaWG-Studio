@@ -39,6 +39,11 @@ from config_builder import (
 from dns_resolver import resolve_servers_sync
 from scan_cache import DEFAULT_SCAN_CACHE_FILE, save_scan_cache
 
+try:  # the QR matrix is pure Python; no image library is needed
+    import qrcode
+except ImportError:
+    qrcode = None
+
 logger = logging.getLogger(__name__)
 
 DEFAULT_ADDRESS = "10.14.0.2/16"
@@ -440,3 +445,40 @@ def prepare_data_folder(candidates: Sequence[str], seed_file: str) -> Optional[s
             shutil.copyfile(seed_file, target)
         return folder
     return None
+
+
+def qr_available() -> bool:
+    return qrcode is not None
+
+
+def qr_matrix(text: str) -> List[List[bool]]:
+    """QR modules as booleans (True = dark), including the white border."""
+    if qrcode is None:
+        raise RuntimeError("qrcode package is not installed")
+    qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_M, border=4)
+    qr.add_data(text)
+    qr.make(fit=True)
+    return [[bool(cell) for cell in row] for row in qr.get_matrix()]
+
+
+def qr_dark_runs(matrix: List[List[bool]], side: int) -> Tuple[int, List[Tuple[int, int, int]]]:
+    """
+    Square module size in pixels, and (x, y, width) rectangles covering the dark modules on a
+    side x side canvas. Horizontal runs of dark modules become one rectangle, which keeps the
+    number of canvas shapes low. Sizes are whole pixels so the edges stay sharp for the camera.
+    """
+    modules = len(matrix)
+    cell = max(1, side // modules)
+    offset = (side - cell * modules) // 2
+    runs: List[Tuple[int, int, int]] = []
+    for row, cells in enumerate(matrix):
+        col = 0
+        while col < modules:
+            if not cells[col]:
+                col += 1
+                continue
+            start = col
+            while col < modules and cells[col]:
+                col += 1
+            runs.append((offset + start * cell, offset + row * cell, (col - start) * cell))
+    return cell, runs

@@ -38,6 +38,8 @@ from mobile_core import (
     endpoints_from_working_configs,
     continent_by_country_code,
     is_mobile_platform,
+    qr_dark_runs,
+    qr_matrix,
     prepare_data_folder,
     continents_present,
     filter_endpoints,
@@ -503,6 +505,14 @@ class TestMobileUiWithMockPage(unittest.TestCase):
         next_button.on_click(None)  # already at the last item: no new copy
         self.assertEqual(page.set_clipboard.call_count, 3)
 
+    def test_config_dialog_draws_the_qr_code_on_a_canvas(self):
+        import flet.canvas as cv
+
+        app, page = self._app()
+        app._open_config_dialog(app.endpoints[0])
+        dialog = self._last_dialog(page)
+        self.assertTrue(any(isinstance(c, cv.Canvas) for c in dialog.content.content.controls))
+
     def test_single_config_dialog_copy_button_copies_its_config(self):
         app, page = self._app()
         app._open_config_dialog(app.endpoints[1])
@@ -715,6 +725,24 @@ class TestMobileUiWithMockPage(unittest.TestCase):
             dialog = self._last_dialog(page)
             dialog.actions[1].on_click(None)  # "ادامه"
             start.assert_called_once()
+
+
+class TestQrCode(unittest.TestCase):
+    def test_runs_cover_exactly_the_dark_modules(self):
+        matrix = qr_matrix(_working()["endpoint_ip"] + " " + "x" * 300)
+        side = 240
+        cell, runs = qr_dark_runs(matrix, side)
+        dark = sum(sum(1 for c in row if c) for row in matrix)
+        covered = sum(width // cell for _x, _y, width in runs)
+        self.assertEqual(covered, dark)
+        self.assertLess(len(runs), dark, "horizontal runs must be merged")
+        for x, y, width in runs:
+            self.assertTrue(0 <= x and x + width <= side and 0 <= y and y + cell <= side)
+
+    def test_matrix_is_square_with_a_white_border(self):
+        matrix = qr_matrix("hello")
+        self.assertEqual(len(matrix), len(matrix[0]))
+        self.assertFalse(any(matrix[0]))  # top border row is light
 
 
 class TestMobilePlatform(unittest.TestCase):

@@ -170,7 +170,7 @@ The phone version can also run on the iPhone itself, without a computer. The app
 **Limits of a free Apple ID:** the signature expires after 7 days. Sideloadly's Auto Refresh re-signs it while the computer and the phone are on the same network. After that, install the IPA again. The app is not on the App Store.
 
 **Differences from the computer version:**
-- There is no QR code on the phone (the imaging library is not included in the iOS build). Copying configs and `wg://` links works.
+- Copying configs and `wg://` links works on the phone, and the QR code is drawn on screen, so you can scan it from the same phone or another device.
 - The VPN is not detected automatically on iOS. Turn the VPN off yourself before the scan.
 - The PrivateKey is kept in memory only, so enter it again after the app restarts.
 
