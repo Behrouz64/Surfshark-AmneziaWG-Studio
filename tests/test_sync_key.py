@@ -40,13 +40,14 @@ class TestPhoneBundleKey(unittest.TestCase):
         text = sync_phone.phone_blueprint_text(self.source)
         self.assertNotIn(TEST_KEY, text)
         data = json.loads(text)
-        self.assertEqual(data["user_interface"]["private_key"], sync_phone.PHONE_SCAN_KEY)
+        self.assertEqual(data["user_interface"]["private_key"], sync_phone.PHONE_BLANK_KEY)
         self.assertEqual(data["servers"][0]["hostname"], "it-mil.prod.surfshark.com")
         self.assertEqual(data["user_interface"]["address"], "10.2.0.2/32")
 
-    def test_the_phone_key_is_the_scanner_placeholder(self):
-        from checker import DEFAULT_DUMMY_CLIENT_KEY
-        self.assertEqual(sync_phone.PHONE_SCAN_KEY, DEFAULT_DUMMY_CLIENT_KEY)
+    def test_the_bundled_key_is_blank_and_not_usable(self):
+        from mobile_core import is_usable_client_key
+        self.assertEqual(sync_phone.PHONE_BLANK_KEY, "")
+        self.assertFalse(is_usable_client_key(sync_phone.PHONE_BLANK_KEY))
 
     def test_a_full_sync_writes_no_user_key_into_phone(self):
         phone_dir = os.path.join(self.folder, "phone")

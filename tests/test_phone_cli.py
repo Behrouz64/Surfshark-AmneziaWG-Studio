@@ -190,49 +190,47 @@ class TestPhoneCliFlows(PhoneCliTestCase):
         self.assertTrue(any("utun3" in line for line in self.lines))
 
 
-def has_key_after_refusal(cli):
-    return bool(cli._ui().private_key)
+class TestBundledKeyIsNotUsable(PhoneCliTestCase):
+    """A key the phone ships with must not count as the user's key; a key the user enters does."""
 
-
-class TestPlaceholderKeyIsNotUsable(PhoneCliTestCase):
-    """The project's dummy key (used by the scanner) must never count as the user's PrivateKey."""
-
-    def test_the_dummy_key_is_not_a_usable_key(self):
-        from checker import DEFAULT_DUMMY_CLIENT_KEY
+    def test_a_blank_bundled_key_is_not_usable(self):
         from mobile_core import has_usable_private_key, is_usable_client_key
-        self.assertFalse(is_usable_client_key(DEFAULT_DUMMY_CLIENT_KEY))
-        self.assertFalse(has_usable_private_key(UserInterfaceConfig(private_key=DEFAULT_DUMMY_CLIENT_KEY)))
-        self.assertTrue(is_usable_client_key(TEST_KEY))
+        self.assertFalse(is_usable_client_key(""))
+        self.assertFalse(has_usable_private_key(UserInterfaceConfig(private_key="")))
 
-    def test_entering_the_dummy_key_says_why_it_is_refused(self):
+    def test_the_users_own_key_is_accepted_even_when_it_equals_the_scanner_constant(self):
+        import urllib.parse
         from checker import DEFAULT_DUMMY_CLIENT_KEY
-        from mobile_core import KEY_FORMAT_MESSAGE, KEY_PLACEHOLDER_MESSAGE, private_key_error
-        self.assertEqual(private_key_error(DEFAULT_DUMMY_CLIENT_KEY), KEY_PLACEHOLDER_MESSAGE)
-        self.assertEqual(private_key_error("not a key"), KEY_FORMAT_MESSAGE)
-        self.assertEqual(private_key_error(TEST_KEY), "")
-        cli = self.make(["1", "0"], secret=DEFAULT_DUMMY_CLIENT_KEY)
+        from mobile_core import private_key_error
+        self.assertEqual(private_key_error(DEFAULT_DUMMY_CLIENT_KEY), "")
+        # enter the key, select all shown, copy the group wg:// links
+        cli = self.make(["1", "4", "a", "5", "2", "0"], secret=DEFAULT_DUMMY_CLIENT_KEY)
         cli.run()
-        self.assertTrue(any(KEY_PLACEHOLDER_MESSAGE in line for line in self.lines))
-        self.assertFalse(has_key_after_refusal(cli))
+        self.assertEqual(len(self.clipboard_calls), 1)
+        self.assertIn("privateKey=" + urllib.parse.quote(DEFAULT_DUMMY_CLIENT_KEY), self.clipboard_calls[0])
 
-    def test_copy_with_the_dummy_key_asks_for_the_real_key_first(self):
-        from checker import DEFAULT_DUMMY_CLIENT_KEY
-        # copy group, no real key given: nothing may reach the clipboard
+    def test_copy_with_a_blank_bundled_key_asks_for_the_key_first(self):
+        # copy group, no key entered: nothing may reach the clipboard
         cli = self.make(["5", "", "0"], secret="")
-        cli._ui().private_key = DEFAULT_DUMMY_CLIENT_KEY
+        cli._ui().private_key = ""
         cli.run()
         self.assertEqual(self.clipboard_calls, [])
         self.assertTrue(any("فرمت کلید درست نیست" in line for line in self.lines))
 
-    def test_scan_runs_without_the_real_key_like_the_app(self):
+    def test_the_scanner_probes_with_its_dummy_key_when_no_key_is_stored(self):
         from checker import DEFAULT_DUMMY_CLIENT_KEY
+        from mobile_core import scan_probe_key
+        self.assertEqual(scan_probe_key(UserInterfaceConfig(private_key="")), DEFAULT_DUMMY_CLIENT_KEY)
+        self.assertEqual(scan_probe_key(UserInterfaceConfig(private_key=TEST_KEY)), TEST_KEY)
+
+    def test_scan_runs_without_a_stored_key_like_the_app(self):
         calls = []
 
         class Result:
             working_configs = []
 
         cli = self.make(["2", "0"], scan_fn=lambda *a, **k: calls.append(1) or Result())
-        cli._ui().private_key = DEFAULT_DUMMY_CLIENT_KEY
+        cli._ui().private_key = ""
         cli.run()
         self.assertEqual(calls, [1])
 

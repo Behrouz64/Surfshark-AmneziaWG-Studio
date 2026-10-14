@@ -30,7 +30,7 @@ from dataclasses import dataclass, field
 from typing import Callable, Dict, Iterable, List, Optional, Sequence, Tuple
 
 from browser_harvest import BlueprintData, UserInterfaceConfig, is_placeholder_key
-from checker import CheckResult, ScanMode, is_placeholder_client_key, run_udp_scan_sync
+from checker import DEFAULT_DUMMY_CLIENT_KEY, CheckResult, ScanMode, run_udp_scan_sync
 from config_builder import (
     AmneziaParams,
     build_amnezia_config,
@@ -312,7 +312,7 @@ def run_mobile_scan(
             "port": server.port,
         }
         for ip in endpoint.ips:
-            targets.append((ip, server.port, blueprint.user_interface.private_key, server.public_key, info))
+            targets.append((ip, server.port, scan_probe_key(blueprint.user_interface), server.public_key, info))
 
     log(f"UDP: تست {len(targets)} آی‌پی روی پورت {DEFAULT_PORT}")
 
@@ -360,11 +360,21 @@ def run_mobile_scan(
 
 def is_usable_client_key(key: Optional[str]) -> bool:
     """
-    A real WireGuard PrivateKey that copies can use. The project's placeholder keys do not count:
-    the seed keys, and the dummy key the scanner uses for its probes (is_placeholder_client_key).
+    A WireGuard PrivateKey that copies can use: well-formed and not one of the seed placeholders.
+    The phone's bundled copy of the blueprint has no key, so a key only counts once the user has
+    entered it (or it is the user's own key in the computer's blueprint).
     """
     key = (key or "").strip()
-    return is_valid_wg_key(key) and not is_placeholder_key(key) and not is_placeholder_client_key(key)
+    return is_valid_wg_key(key) and not is_placeholder_key(key)
+
+
+def scan_probe_key(ui: UserInterfaceConfig) -> str:
+    """
+    The PrivateKey the scanner probes with: the stored key when it is well-formed, otherwise the
+    scanner's dummy key. The probe does not need the user's key, but a copy does.
+    """
+    key = (ui.private_key or "").strip()
+    return key if is_valid_wg_key(key) else DEFAULT_DUMMY_CLIENT_KEY
 
 
 KEY_FORMAT_MESSAGE = "فرمت کلید درست نیست. کلید WireGuard باید ۴۴ کاراکتر باشد و با = تمام شود."

@@ -30,20 +30,20 @@ PHONE_MODULES = (
 PHONE_DATA = ("surfshark_servers.json",)
 PHONE_ASSETS = "assets"  # fonts, copied as a folder
 
-# The scanner's placeholder key (checker.DEFAULT_DUMMY_CLIENT_KEY). It is well-formed but is not a
-# user's key, so it is safe to ship. tests/test_mobile.py checks that it matches checker.py.
-PHONE_SCAN_KEY = "GJfG1b7zCubnBHQHdNyJVKDMtoylDQgfpqZDhm4jjVM="
+# The phone bundle ships with no key. The user enters their own key in the app, and the scanner
+# falls back to its dummy probe key (mobile_core.scan_probe_key) when none is stored.
+PHONE_BLANK_KEY = ""
 
 
 def phone_blueprint_text(source_path: str) -> str:
     """
-    The blueprint as the phone bundle gets it: the same servers, but the PrivateKey replaced by the
-    scanner's placeholder. A key the user saved on the computer must never end up inside the IPA or APK.
+    The blueprint as the phone bundle gets it: the same servers, with the PrivateKey left blank. A key
+    the user saved on the computer must never end up inside the IPA or APK.
     """
     with open(source_path, encoding="utf-8") as handle:
         data = json.load(handle)
     if isinstance(data.get("user_interface"), dict):
-        data["user_interface"]["private_key"] = PHONE_SCAN_KEY
+        data["user_interface"]["private_key"] = PHONE_BLANK_KEY
     return json.dumps(data, ensure_ascii=False, indent=2) + "\n"
 
 
