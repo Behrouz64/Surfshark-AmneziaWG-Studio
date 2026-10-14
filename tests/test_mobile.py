@@ -567,7 +567,8 @@ class TestMobileUiWithMockPage(unittest.TestCase):
         joined = " | ".join(str(label) for label in labels)
         self.assertIn("AmneziaWG", joined)
         self.assertIn("wg://", joined)
-        self.assertEqual(len(labels), 5)
+        self.assertEqual(len(labels), 6)
+        self.assertIn("کپی اشتراک Shadowrocket", joined)
 
     def test_phone_skips_desktop_vpn_probe_and_keeps_content_clear_of_notch(self):
         import mobile_app
@@ -746,6 +747,85 @@ class TestQrCode(unittest.TestCase):
         self.assertFalse(any(matrix[0]))  # top border row is light
 
 
+class TestPersianText(unittest.TestCase):
+    def test_persian_font_is_bundled_and_wired(self):
+        font = os.path.join(REPO_ROOT, "assets", "fonts", "Vazirmatn-NL-Regular.ttf")
+        self.assertTrue(os.path.exists(font))
+        self.assertGreater(os.path.getsize(font), 10000)
+        self.assertTrue(os.path.exists(os.path.join(REPO_ROOT, "assets", "fonts", "OFL-Vazirmatn.txt")))
+        with open(os.path.join(REPO_ROOT, "mobile_app.py"), encoding="utf-8") as f:
+            source = f.read()
+        self.assertIn('page.fonts = {"Vazirmatn": "fonts/Vazirmatn-NL-Regular.ttf"}', source)
+        self.assertIn('font_family="Vazirmatn"', source)
+
+    def test_latin_fragments_are_isolated_and_persian_is_untouched(self):
+        from mobile_core import isolate_ltr
+
+        text = "برای Shadowrocket از wg:// استفاده کنید و python3 main.py --mobile را بزنید."
+        out = isolate_ltr(text)
+        self.assertIn("\u2066wg://\u2069", out)
+        self.assertIn("\u2066python3 main.py --mobile\u2069", out)
+        self.assertEqual(isolate_ltr("متن فارسی بدون لاتین"), "متن فارسی بدون لاتین")
+        self.assertIn("\u2066.conf\u2069", isolate_ltr("فایل .conf"))
+
+    def test_list_lines_keep_the_number_and_bullet_in_order(self):
+        from mobile_core import format_bullet, format_step
+
+        step = format_step(1, "لینک wg:// را کپی کنید")
+        self.assertTrue(step.startswith("\u20661.\u2069 "))
+        self.assertIn("\u2066wg://\u2069", step)
+        self.assertEqual(format_bullet("wg://x"), "• \u2066wg://x\u2069")
+
+    def test_group_subscription_decodes_to_one_wg_link_per_line(self):
+        from mobile_core import build_group_wg_subscription
+
+        eps = endpoints_from_working_configs([
+            _working(endpoint_ip="185.1.1.1"), _working(endpoint_ip="185.1.1.2", city="Frankfurt"),
+        ])
+        raw, encoded = build_group_wg_subscription(eps, _ui(), AmneziaParams.iran_preset())
+        decoded = base64.b64decode(encoded).decode("utf-8")
+        self.assertEqual(decoded, raw)
+        lines = decoded.split("\n")
+        self.assertEqual(len(lines), 2)
+        self.assertTrue(all(line.startswith("wg://") for line in lines))
+
+
+class TestGuideMatchesUi(unittest.TestCase):
+    BUTTON_LABELS = (
+        "صف کپی کانفیگ",
+        "صف کپی لینک wg://",
+        "کپی متن ترکیبی",
+        "کپی همه لینک‌های wg://",
+        "کپی اشتراک Shadowrocket",
+        "کپی لیست کشور، شهر و آی‌پی",
+        "انتخاب همه‌ی نمایش‌داده‌شده",
+        "انتخاب کل کشور",
+        "لغو انتخاب کشور",
+        "پاک کردن انتخاب",
+        "همه‌ی قاره‌ها",
+        "شروع اسکن",
+        "بعدی",
+    )
+
+    def setUp(self):
+        from mobile_guide import GUIDE
+        with open(os.path.join(REPO_ROOT, "mobile_app.py"), encoding="utf-8") as f:
+            self.ui_source = f.read()
+        self.guide_fa = " ".join(
+            str(value) if not isinstance(value, list) else " ".join(value)
+            for section in GUIDE["fa"]
+            for _kind, value in section["blocks"]
+        )
+
+    def test_every_button_the_guide_names_exists_in_the_app(self):
+        for label in self.BUTTON_LABELS:
+            self.assertIn(label, self.ui_source, label)
+
+    def test_guide_names_the_group_copy_options(self):
+        for label in ("صف کپی کانفیگ", "صف کپی لینک wg://", "کپی اشتراک Shadowrocket", "کپی لیست کشور، شهر و آی‌پی"):
+            self.assertIn(label, self.guide_fa, label)
+
+
 class TestMobilePlatform(unittest.TestCase):
     def test_mobile_platforms_are_detected_from_enum_or_string(self):
         from flet.core.types import PagePlatform
@@ -823,7 +903,7 @@ class TestPhoneBundle(unittest.TestCase):
             source = f.read()
         self.assertIn("prepare_data_folder", source)
         self.assertIn("from mobile_app import main as mobile_main", source)
-        self.assertIn("ft.app(target=mobile_main)", source)
+        self.assertIn("ft.app(target=mobile_main, assets_dir=", source)
 
 
 class TestTokenGate(unittest.TestCase):

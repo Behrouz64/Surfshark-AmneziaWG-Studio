@@ -26,3 +26,4 @@ phone/*.py
 phone/surfshark_servers.json
 phone/build/
 phone/build
+phone/assets/

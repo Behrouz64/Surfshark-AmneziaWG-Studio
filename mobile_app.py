@@ -45,6 +45,10 @@ from mobile_core import (
     build_endpoint_wg_link,
     build_group_config_text,
     build_group_wg_links_text,
+    build_group_wg_subscription,
+    format_bullet,
+    format_step,
+    isolate_ltr,
     endpoints_from_working_configs,
     group_by_country,
     has_usable_private_key,
@@ -148,7 +152,8 @@ class MobileStudioApp:
         page.theme_mode = ft.ThemeMode.DARK
         page.bgcolor = BG
         page.padding = 0
-        page.theme = ft.Theme(color_scheme_seed=ACCENT)
+        page.fonts = {"Vazirmatn": "fonts/Vazirmatn-NL-Regular.ttf"}
+        page.theme = ft.Theme(color_scheme_seed=ACCENT, font_family="Vazirmatn")
 
         page.navigation_bar = ft.NavigationBar(
             selected_index=0,
@@ -490,18 +495,18 @@ class MobileStudioApp:
 
     def _guide_block(self, kind: str, value) -> ft.Control:
         if kind == "p":
-            return ft.Text(value, size=13, color=MUTED)
+            return ft.Text(isolate_ltr(value), size=13, color=MUTED)
         if kind == "note":
             return ft.Container(
                 bgcolor=WARN_BG,
                 border_radius=10,
                 padding=10,
-                content=ft.Text(value, size=12, color=WARN),
+                content=ft.Text(isolate_ltr(value), size=12, color=WARN),
             )
         if kind == "ol":
-            rows = [ft.Text(f"{n}. {text}", size=13, color=MUTED) for n, text in enumerate(value, start=1)]
+            rows = [ft.Text(format_step(n, text), size=13, color=MUTED) for n, text in enumerate(value, start=1)]
         else:
-            rows = [ft.Text(f"• {text}", size=13, color=MUTED) for text in value]
+            rows = [ft.Text(format_bullet(text), size=13, color=MUTED) for text in value]
         return ft.Column(spacing=6, controls=rows)
 
 
@@ -819,6 +824,11 @@ class MobileStudioApp:
                             on_click=lambda e: self._copy_group_wg(dialog, items),
                         ),
                         ft.OutlinedButton(
+                            "کپی اشتراک Shadowrocket (base64، همه‌ی سرورها)",
+                            icon=ft.Icons.SUBSCRIPTIONS_ROUNDED,
+                            on_click=lambda e: self._copy_group_wg_subscription(dialog, items),
+                        ),
+                        ft.OutlinedButton(
                             "کپی لیست کشور، شهر و آی‌پی",
                             icon=ft.Icons.LIST_ALT_ROUNDED,
                             on_click=lambda e: self._copy_endpoint_list(dialog, items),
@@ -844,6 +854,11 @@ class MobileStudioApp:
         self._close_control(dialog)
         text = build_group_wg_links_text(items, self.blueprint.user_interface, self._params())
         self._copy(text, f"{len(items)} لینک wg:// کپی شد (هر خط یک لینک)")
+
+    def _copy_group_wg_subscription(self, dialog, items: List[Endpoint]):
+        self._close_control(dialog)
+        _raw, encoded = build_group_wg_subscription(items, self.blueprint.user_interface, self._params())
+        self._copy(encoded, f"اشتراک {len(items)} سرور کپی شد (base64)")
 
     def _copy_endpoint_list(self, dialog, items: List[Endpoint]):
         self._close_control(dialog)

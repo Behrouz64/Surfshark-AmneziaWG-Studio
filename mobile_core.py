@@ -20,9 +20,11 @@ app control, no pbcopy. It only builds text. Those stay in the desktop ui.py.
 
 from __future__ import annotations
 
+import base64
 import hmac
 import logging
 import os
+import re
 import shutil
 from dataclasses import dataclass, field
 from typing import Callable, Dict, Iterable, List, Optional, Sequence, Tuple
@@ -482,3 +484,41 @@ def qr_dark_runs(matrix: List[List[bool]], side: int) -> Tuple[int, List[Tuple[i
                 col += 1
             runs.append((offset + start * cell, offset + row * cell, (col - start) * cell))
     return cell, runs
+
+
+def build_group_wg_subscription(endpoints: Sequence[Endpoint], ui: UserInterfaceConfig, params: AmneziaParams) -> Tuple[str, str]:
+    """
+    (raw lines, base64) for Shadowrocket. The base64 text is what the desktop app copies for its
+    subscription button: the same newline-joined wg:// links, base64-encoded.
+    """
+    raw = build_group_wg_links_text(endpoints, ui, params)
+    return raw, base64.b64encode(raw.encode("utf-8")).decode("ascii")
+
+
+_LATIN_RUN = re.compile(r"[A-Za-z0-9_./:#=+\-]+(?:[ \t]+[A-Za-z0-9_./:#=+\-]+)*")
+
+
+def isolate_ltr(text: str) -> str:
+    """
+    Wraps Latin runs that contain dots, colons or symbols (wg://, .conf, python3 main.py --mobile)
+    in Unicode isolation marks, so their order stays correct inside right-to-left Persian text.
+    """
+    def wrap(match):
+        run = match.group(0)
+        if re.search(r"[A-Za-z0-9]", run) and re.search(r"[./:#=]", run):
+            return f"\u2066{run}\u2069"
+        return run
+    return _LATIN_RUN.sub(wrap, text)
+
+
+def format_step(number: int, text: str) -> str:
+    """
+    A numbered guide step. The number sits in its own LTR isolate, so it reads "1." and not
+    ".1" at the start of a right-to-left line, and a Latin run in the text cannot pull it along.
+    """
+    return f"\u2066{number}.\u2069 {isolate_ltr(text)}"
+
+
+def format_bullet(text: str) -> str:
+    """A guide bullet line, with the same isolation as format_step."""
+    return f"• {isolate_ltr(text)}"

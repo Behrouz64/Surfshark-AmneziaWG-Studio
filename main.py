@@ -155,9 +155,8 @@ def _guess_lan_ip() -> str:
 
 def run_mobile(port: int = 8550):
     """
-    Serves the phone-friendly UI over the local network. Requests from other machines must
-    carry the random token printed here (?t=...), because the page can copy WireGuard keys.
-    Requests from this computer (127.0.0.1) do not need it.
+    Serves the phone-friendly UI over the local network. Every visitor must carry the random
+    token printed here (?t=...), this computer included, because the page can copy WireGuard keys.
     """
     import functools
     import secrets
@@ -185,6 +184,7 @@ def run_mobile(port: int = 8550):
     ft.app(
         target=functools.partial(mobile_main, token=token),
         view=None,
+        assets_dir=os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets"),
         host="0.0.0.0",
         port=port,
     )

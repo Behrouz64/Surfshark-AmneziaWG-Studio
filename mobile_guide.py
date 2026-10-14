@@ -5,7 +5,8 @@ Each language has the same sections in the same order, and every section is a
 list of blocks: ('p', text), ('ol', [steps]), ('ul', [items]), ('note', text).
 check_guide_parity() reports any mismatch; tests/test_mobile.py runs it.
 
-The guide describes the phone UI in mobile_app.py. Keep the two in step.
+The guide describes the phone UI in mobile_app.py. Keep the two in step: the
+button labels quoted here must match the labels in mobile_app.py.
 """
 
 from __future__ import annotations
@@ -24,9 +25,9 @@ GUIDE: Dict[str, List[Section]] = {
         {
             "title": "این نسخه چه کاری می‌کند",
             "blocks": [
-                ("p", "این نسخه‌ی گوشی سرورهای Surfshark را اسکن می‌کند، سرعت هر سرور را با پینگ می‌سنجد و سریع‌ترین‌ها را نشان می‌دهد. برای هر سرور می‌توانید کانفیگ AmneziaWG یا لینک wg:// بگیرید."),
+                ("p", "این نسخه‌ی گوشی سرورهای Surfshark را اسکن می‌کند، پینگ هر سرور را می‌سنجد و سریع‌ترین‌ها را نشان می‌دهد. برای هر سرور می‌توانید کانفیگ AmneziaWG یا لینک wg:// بگیرید."),
                 ("p", "نسخه‌ی نصب‌شده روی گوشی (IPA یا APK) مستقل است و به کامپیوتر نیاز ندارد. اسکن از اینترنت خود گوشی انجام می‌شود. اگر نسخه‌ی کامپیوتر را در شبکه‌ی محلی باز می‌کنید، برنامه روی کامپیوتر اجرا می‌شود و از گوشی با همان Wi-Fi باز می‌شود."),
-                ("note", "«پینگ» یعنی زمانی که یک پیام کوچک لازم دارد تا به سرور برسد و برگردد. عدد کمتر یعنی سرور سریع‌تر."),
+                ("note", "«پینگ» زمانی است که یک پیام کوچک لازم دارد تا به سرور برسد و برگردد. عدد کمتر یعنی سرور سریع‌تر."),
             ],
         },
         {
@@ -44,11 +45,24 @@ GUIDE: Dict[str, List[Section]] = {
             "title": "مراحل کار",
             "blocks": [
                 ("ol", [
-                    "برنامه‌ی نصب‌شده را روی گوشی باز کنید. اگر از نسخه‌ی کامپیوتر استفاده می‌کنید: python3 main.py --mobile را اجرا کنید و آدرس کامل را در گوشی باز کنید.",
+                    "برنامه‌ی نصب‌شده را روی گوشی باز کنید. اگر از نسخه‌ی کامپیوتر استفاده می‌کنید، در ترمینال کامپیوتر دستور python3 main.py --mobile را اجرا کنید و آدرس کامل را در مرورگر گوشی باز کنید.",
                     "در تب «تنظیمات» کلید PrivateKey را وارد کنید.",
-                    "در تب «اسکن» با VPN خاموش، اسکن را بزنید. تا پایان اسکن صبر کنید.",
+                    "در تب «اسکن» با VPN خاموش، «شروع اسکن» را بزنید و تا پایان صبر کنید.",
                     "در تب «سرورها» سرورهای سالم را بر اساس کشور ببینید.",
-                    "دکمه‌های کپی هر سرور را بزنید، یا چند سرور را تیک بزنید و از دکمه‌ی پایین صفحه گروهی کپی کنید.",
+                    "دکمه‌ی کپی هر سرور را بزنید، یا چند سرور را تیک بزنید. وقتی سروری انتخاب شده باشد، دکمه‌ی «انتخاب» پایین صفحه ظاهر می‌شود؛ آن را برای کپی گروهی بزنید.",
+                ]),
+            ],
+        },
+        {
+            "title": "فیلتر قاره و انتخاب گروهی",
+            "blocks": [
+                ("p", "بالای فهرست سرورها این بخش‌ها هستند:"),
+                ("ul", [
+                    "دکمه‌های قاره: فقط سرورهای همان قاره را نشان می‌دهند. «همه‌ی قاره‌ها» یعنی بدون فیلتر. عدد کنار هر قاره تعداد سرورهای آن است.",
+                    "کادر جستجو: نام کشور، شهر یا آی‌پی را بنویسید.",
+                    "«انتخاب همه‌ی نمایش‌داده‌شده»: همه‌ی سرورهایی را که الان روی صفحه‌اند (بعد از فیلتر قاره و جستجو) انتخاب می‌کند.",
+                    "«انتخاب کل کشور» در هر کشور: همه‌ی سرورهای همان کشور را انتخاب می‌کند. اگر همه انتخاب باشند، همین دکمه «لغو انتخاب کشور» می‌شود.",
+                    "«پاک کردن انتخاب»: همه‌ی تیک‌ها را برمی‌دارد.",
                 ]),
             ],
         },
@@ -57,23 +71,25 @@ GUIDE: Dict[str, List[Section]] = {
             "blocks": [
                 ("ul", [
                     "کپی کانفیگ (AmneziaWG): متن کامل کانفیگ یک سرور را کپی می‌کند. در اپ AmneziaWG تونل جدید را از متن وارد کنید.",
-                    "کپی wg:// (Shadowrocket): لینک wg:// همان سرور را کپی می‌کند. در Shadowrocket از کلیپ‌بورد وارد کنید.",
-                    "متن و QR: کانفیگ را نشان می‌دهد و کد QR آن را می‌سازد. متن را می‌توانید با لمس طولانی دستی انتخاب و کپی کنید.",
+                    "کپی wg:// (Shadowrocket): لینک wg:// همان سرور را کپی می‌کند. در Shadowrocket آن را از کلیپ‌بورد اضافه کنید.",
+                    "متن و QR: کانفیگ را نشان می‌دهد و کد QR آن را روی صفحه می‌سازد. کد QR را از گوشی دیگری اسکن کنید. متن را هم می‌توانید با لمس طولانی دستی کپی کنید.",
                 ]),
-                ("note", "کانفیگ و لینک wg:// هر دو کلید خصوصی شما را دارند. آن‌ها را جای عمومی نفرستید."),
+                ("note", "کانفیگ و لینک wg:// هر دو کلید خصوصی شما را دارند. آن‌ها را برای کسی نفرستید."),
             ],
         },
         {
             "title": "کپی گروهی",
             "blocks": [
-                ("p", "سرورها را تیک بزنید، یا دکمه «انتخاب کل کشور» را بزنید. سپس دکمه‌ی انتخاب پایین صفحه را بزنید:"),
+                ("p", "سرورها را تیک بزنید، سپس دکمه‌ی «انتخاب» پایین صفحه را بزنید. گزینه‌ها:"),
                 ("ul", [
-                    "صف کپی کانفیگ: یکی‌یکی کپی می‌کند. هر کانفیگ را وارد کنید، برگردید و «بعدی» را بزنید. اپ AmneziaWG هر بار یک کانفیگ می‌گیرد.",
-                    "صف کپی wg://: همین کار را برای لینک‌های wg:// با Shadowrocket انجام می‌دهد.",
-                    "متن ترکیبی: همه‌ی کانفیگ‌های انتخاب‌شده در یک متن، با جداکننده‌ی شماره‌دار. برای ذخیره یا ارسال خوب است، اما هیچ کلاینتی آن را یکجا وارد نمی‌کند.",
-                    "همه‌ی لینک‌های wg://: هر خط یک لینک. برای وارد کردن در Shadowrocket، هر خط را جدا کپی کنید یا از صف استفاده کنید.",
-                    "لیست کشور و آی‌پی: فقط نام کشور، شهر، آی‌پی و پینگ را کپی می‌کند، بدون کلید.",
+                    "صف کپی کانفیگ (یکی‌یکی برای AmneziaWG): هر بار یک کانفیگ کپی می‌شود. آن را در اپ وارد کنید، برگردید و «بعدی» را بزنید. اپ AmneziaWG هر بار یک کانفیگ می‌گیرد.",
+                    "صف کپی لینک wg:// (یکی‌یکی برای Shadowrocket): همین کار را برای لینک‌های wg:// انجام می‌دهد. برای Shadowrocket مطمئن‌ترین روش همین صف است.",
+                    "کپی متن ترکیبی همه کانفیگ‌ها: همه‌ی کانفیگ‌ها در یک متن، با جداکننده‌ی شماره‌دار. برای ذخیره یا ارسال خوب است، اما کلاینت‌ها آن را یکجا وارد نمی‌کنند.",
+                    "کپی همه لینک‌های wg:// (هر خط یک لینک): همه‌ی لینک‌ها در متن چندخطی. Shadowrocket ممکن است چنین متنی را یکجا وارد نکند.",
+                    "کپی اشتراک Shadowrocket (base64، همه‌ی سرورها): همه‌ی لینک‌ها به‌صورت یک متن base64 برای ساخت اشتراک. اگر Shadowrocket آن را از کلیپ‌بورد نپذیرفت، از صف لینک wg:// استفاده کنید.",
+                    "کپی لیست کشور، شهر و آی‌پی: فقط نام کشور، شهر، آی‌پی و پینگ را کپی می‌کند، بدون کلید.",
                 ]),
+                ("note", "گزینه‌های گروهی برای Shadowrocket روی گوشی واقعی هنوز کامل تست نشده‌اند. هر گزینه را یک بار امتحان کنید و ببینید کدام وارد می‌شود."),
             ],
         },
         {
@@ -81,9 +97,10 @@ GUIDE: Dict[str, List[Section]] = {
             "blocks": [
                 ("p", "سروری که «سالم» نشان داده می‌شود فقط از آزمون پینگ گذشته است. برای اطمینان آن را در یک کلاینت واقعی وصل کنید:"),
                 ("ul", [
-                    "AmneziaWG: در اپ، «افزودن تونل» را بزنید و کانفیگ را از متن وارد کنید.",
-                    "Shadowrocket: لینک wg:// را کپی کنید. Shadowrocket هنگام کپی آن را از کلیپ‌بورد می‌خواند.",
+                    "AmneziaWG: در اپ، افزودن تونل را بزنید و متن کانفیگ را وارد کنید.",
+                    "Shadowrocket: لینک wg:// یک سرور را کپی کنید و از کلیپ‌بورد اضافه کنید. اگر نسخه‌ی Shadowrocket شما این کار را نکرد، همان لینک را از گزینه‌ی دیگری در Shadowrocket وارد کنید.",
                 ]),
+                ("note", "اگر بعد از اتصال اینترنت قطع شد یا سایت‌ها باز نشدند، سرور دیگری را امتحان کنید. پینگ خوب همیشه تضمین اتصال نیست."),
             ],
         },
         {
@@ -133,11 +150,24 @@ GUIDE: Dict[str, List[Section]] = {
             "title": "Steps",
             "blocks": [
                 ("ol", [
-                    "Open the installed app on the phone. If you use the computer version: run python3 main.py --mobile and open the full address on the phone.",
+                    "Open the installed app on the phone. If you use the computer version: run python3 main.py --mobile and open the full address in the phone's browser.",
                     "In the Settings tab, enter your PrivateKey.",
-                    "In the Scan tab, with the VPN off, tap scan and wait for it to finish.",
+                    "In the Scan tab, with the VPN off, tap Start scan and wait for it to finish.",
                     "In the Servers tab, see the working servers grouped by country.",
-                    "Tap a server's copy button, or tick several servers and use the button at the bottom for a group copy.",
+                    "Tap a server's copy button, or tick several servers. Once a server is selected, the Select button at the bottom of the screen appears; tap it for a group copy.",
+                ]),
+            ],
+        },
+        {
+            "title": "Filter by continent and select in bulk",
+            "blocks": [
+                ("p", "At the top of the server list you will find these controls:"),
+                ("ul", [
+                    "Continent buttons: show only the servers of that continent. \"All continents\" means no filter. The number next to each continent is its server count.",
+                    "Search box: type a country, city or IP.",
+                    "\"Select all shown\": selects every server currently on the screen (after the continent filter and the search).",
+                    "\"Select whole country\" on each country: selects all servers of that country. When they are all selected, the button becomes \"Deselect country\".",
+                    "\"Clear selection\": removes all ticks.",
                 ]),
             ],
         },
@@ -147,7 +177,7 @@ GUIDE: Dict[str, List[Section]] = {
                 ("ul", [
                     "Copy config (AmneziaWG): copies the full config of one server. In the AmneziaWG app, add a tunnel from text.",
                     "Copy wg:// (Shadowrocket): copies the wg:// link of that server. In Shadowrocket, add it from the clipboard.",
-                    "Text and QR: shows the config and builds its QR code. You can also long-press the text to select and copy it by hand.",
+                    "Text and QR: shows the config and draws its QR code on the screen. Scan the QR code with another phone. You can also long-press the text to select and copy it by hand.",
                 ]),
                 ("note", "Both the config and the wg:// link contain your private key. Do not send them to anyone."),
             ],
@@ -155,14 +185,16 @@ GUIDE: Dict[str, List[Section]] = {
         {
             "title": "Group copy",
             "blocks": [
-                ("p", "Tick servers, or tap \"select whole country\". Then tap the selection button at the bottom of the screen:"),
+                ("p", "Tick servers, then tap the Select button at the bottom of the screen. The options:"),
                 ("ul", [
-                    "Config queue: copies one config at a time. Import it, come back, and tap Next. The AmneziaWG app takes one config per paste.",
-                    "wg:// queue: the same, for wg:// links in Shadowrocket.",
+                    "Config queue (one at a time for AmneziaWG): copies one config at a time. Import it in the app, come back, and tap Next. The AmneziaWG app takes one config per paste.",
+                    "wg:// queue (one at a time for Shadowrocket): the same, for wg:// links. For Shadowrocket this is the safest group method.",
                     "Combined text: all selected configs in one text, with numbered separators. Good for saving or sending, but no client imports it in one go.",
-                    "All wg:// links: one link per line. In Shadowrocket, copy them one by one, or use the queue.",
-                    "Country and IP list: only the country, city, IP and ping, with no key.",
+                    "All wg:// links (one link per line): all links in one multi-line text. Shadowrocket may not import a multi-line text in one go.",
+                    "Shadowrocket subscription (base64, all servers): all links encoded as one base64 text, for making a subscription. If Shadowrocket does not accept it from the clipboard, use the wg:// queue.",
+                    "Country, city and IP list: only the country, city, IP and ping, with no key.",
                 ]),
+                ("note", "The group options for Shadowrocket have not been fully tested on a real phone yet. Try each one once and see which one imports."),
             ],
         },
         {
@@ -171,8 +203,9 @@ GUIDE: Dict[str, List[Section]] = {
                 ("p", "A server shown as working has only passed the ping test. Connect it in a real client to be sure:"),
                 ("ul", [
                     "AmneziaWG: in the app, add a tunnel and paste the config text.",
-                    "Shadowrocket: copy the wg:// link. Shadowrocket reads it from the clipboard when you add it.",
+                    "Shadowrocket: copy the wg:// link of one server and add it from the clipboard. If your Shadowrocket version does not accept it that way, add it with another method that Shadowrocket offers.",
                 ]),
+                ("note", "If the connection drops or sites do not open after connecting, try another server. A good ping does not guarantee a working connection."),
             ],
         },
         {
@@ -191,7 +224,7 @@ GUIDE: Dict[str, List[Section]] = {
             "blocks": [
                 ("ul", [
                     "The phone cannot open the page: check that both devices are on the same Wi-Fi or hotspot, and that the computer's firewall allows port 8550.",
-                    "You see \"Access denied\": copy the full address with ?t=... from the computer's terminal.",
+                    "You see \"دسترسی ممنوع\" (access denied): copy the full address with ?t=... from the computer's terminal.",
                     "Automatic copy does not work: the browser blocks clipboard access on a plain HTTP address. Long-press the text in the config box and copy it by hand.",
                     "No servers appear: run the scan again with the VPN off.",
                 ]),

@@ -27,6 +27,7 @@ PHONE_MODULES = (
     "vpn_detector.py",
 )
 PHONE_DATA = ("surfshark_servers.json",)
+PHONE_ASSETS = "assets"  # fonts, copied as a folder
 
 
 def sync():
@@ -34,6 +35,8 @@ def sync():
     for name in PHONE_MODULES + PHONE_DATA:
         shutil.copyfile(os.path.join(ROOT, name), os.path.join(PHONE_DIR, name))
         copied.append(name)
+    shutil.copytree(os.path.join(ROOT, PHONE_ASSETS), os.path.join(PHONE_DIR, PHONE_ASSETS), dirs_exist_ok=True)
+    copied.append(PHONE_ASSETS + "/")
     return copied
 
 

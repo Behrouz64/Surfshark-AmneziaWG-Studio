@@ -26,4 +26,4 @@ if _folder:
 from mobile_app import main as mobile_main  # noqa: E402  (imported after chdir: data paths are relative)
 
 # Called at module level, not under __main__: mobile platforms load this file under another name.
-ft.app(target=mobile_main)
+ft.app(target=mobile_main, assets_dir=os.path.join(_HERE, "assets"))
