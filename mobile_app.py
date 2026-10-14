@@ -958,8 +958,10 @@ def main(page: ft.Page, token: str = ""):
 
 
 def _query_token(page: ft.Page) -> Optional[str]:
-    # Flet's QueryString.get raises KeyError for a missing key instead of returning None.
+    # Flet fills the query only when it refreshes it (on route events), so refresh it first.
+    # QueryString.get raises KeyError for a missing key instead of returning None.
     try:
+        page.query()
         return page.query.get("t")
     except (KeyError, AttributeError):
         return None

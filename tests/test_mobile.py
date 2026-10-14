@@ -346,6 +346,9 @@ class _FakeQuery:
     def __init__(self, data: dict):
         self._data = data
 
+    def __call__(self):
+        return None
+
     def get(self, key: str) -> str:
         return self._data[key]
 
@@ -618,6 +621,24 @@ class TestMobileUiWithMockPage(unittest.TestCase):
 
 
 class TestTokenGate(unittest.TestCase):
+    def test_token_is_read_from_real_flet_query_after_refresh(self):
+        """Flet's QueryString is empty until refreshed, so a token in the route must still be seen."""
+        import mobile_app
+        from flet.core.querystring import QueryString
+
+        page = MagicMock()
+        page.client_ip = "192.168.1.20"
+        page.url = "http://192.168.1.5:8550"
+        page.route = "/?t=tok"
+        page.query = QueryString(page=page)
+        self.assertTrue(mobile_app._is_authorized(page, "tok"))
+
+        page.route = "/?t=wrong"
+        self.assertFalse(mobile_app._is_authorized(page, "tok"))
+
+        page.route = "/"
+        self.assertFalse(mobile_app._is_authorized(page, "tok"))
+
     def test_token_gate_allows_local_and_valid_token_only(self):
         import mobile_app
 
