@@ -169,7 +169,6 @@ class TestCopyFormats(unittest.TestCase):
             },
             {"private_key": REAL_KEY, "address": "10.14.0.2/16", "dns": "162.252.172.57"},
             self.params,
-            title_prefix="",
             show_latency=False,
         )
         self.assertEqual(build_endpoint_wg_link(ep, _ui(), self.params), expected)
@@ -796,8 +795,8 @@ class TestShadowrocketReferenceLinks(unittest.TestCase):
     """The phone's wg:// links must match this reference export byte for byte."""
 
     REFERENCE = [
-        "wg://195.86.6.249:51820?publicKey=9h4WUC/U%2BWnr58UAqZCitc5Cl0nf3D9IzFQMT4IsmUk%3D&privateKey=cF4B4RXTVug8PI2%2BmDxm8f1G/Ro0NHuWeO6jyOWRp18%3D&ip=10.2.0.2&dns=10.2.0.1%2C%202a07%3Ab944%3A%3A2%3A1&mtu=1280&udp=1&keepalive=25&obfs=amneziawg&obfsParam=%7B%22jc%22%3A%224%22%2C%22jmin%22%3A%2250%22%2C%22jmax%22%3A%221000%22%2C%22s1%22%3A%220%22%2C%22s2%22%3A%220%22%2C%22h1%22%3A%221%22%2C%22h2%22%3A%222%22%2C%22h3%22%3A%223%22%2C%22h4%22%3A%224%22%7D#%F0%9F%87%AE%F0%9F%87%B9%20Italy%20%E2%80%94%20Milan%20%28195.86.6.249%29",
-        "wg://149.22.91.161:51820?publicKey=4D4PkMrszUx3%2BRj4qLZIH1r7s6VAjS28sl34VG5%2BJyE%3D&privateKey=cF4B4RXTVug8PI2%2BmDxm8f1G/Ro0NHuWeO6jyOWRp18%3D&ip=10.2.0.2&dns=10.2.0.1%2C%202a07%3Ab944%3A%3A2%3A1&mtu=1280&udp=1&keepalive=25&obfs=amneziawg&obfsParam=%7B%22jc%22%3A%224%22%2C%22jmin%22%3A%2250%22%2C%22jmax%22%3A%221000%22%2C%22s1%22%3A%220%22%2C%22s2%22%3A%220%22%2C%22h1%22%3A%221%22%2C%22h2%22%3A%222%22%2C%22h3%22%3A%223%22%2C%22h4%22%3A%224%22%7D#%F0%9F%87%AE%F0%9F%87%B9%20Italy%20%E2%80%94%20Palermo%20%28149.22.91.161%29",
+        "wg://195.86.6.249:51820?publicKey=9h4WUC/U%2BWnr58UAqZCitc5Cl0nf3D9IzFQMT4IsmUk%3D&privateKey=cF4B4RXTVug8PI2%2BmDxm8f1G/Ro0NHuWeO6jyOWRp18%3D&ip=10.2.0.2&dns=10.2.0.1%2C%202a07%3Ab944%3A%3A2%3A1&mtu=1280&udp=1&keepalive=25&obfs=amneziawg&obfsParam=%7B%22jc%22%3A%224%22%2C%22jmin%22%3A%2250%22%2C%22jmax%22%3A%221000%22%2C%22s1%22%3A%220%22%2C%22s2%22%3A%220%22%2C%22h1%22%3A%221%22%2C%22h2%22%3A%222%22%2C%22h3%22%3A%223%22%2C%22h4%22%3A%224%22%7D#%F0%9F%A6%88%20%F0%9F%87%AE%F0%9F%87%B9%20Italy%20%E2%80%94%20Milan%20%28195.86.6.249%29",
+        "wg://149.22.91.161:51820?publicKey=4D4PkMrszUx3%2BRj4qLZIH1r7s6VAjS28sl34VG5%2BJyE%3D&privateKey=cF4B4RXTVug8PI2%2BmDxm8f1G/Ro0NHuWeO6jyOWRp18%3D&ip=10.2.0.2&dns=10.2.0.1%2C%202a07%3Ab944%3A%3A2%3A1&mtu=1280&udp=1&keepalive=25&obfs=amneziawg&obfsParam=%7B%22jc%22%3A%224%22%2C%22jmin%22%3A%2250%22%2C%22jmax%22%3A%221000%22%2C%22s1%22%3A%220%22%2C%22s2%22%3A%220%22%2C%22h1%22%3A%221%22%2C%22h2%22%3A%222%22%2C%22h3%22%3A%223%22%2C%22h4%22%3A%224%22%7D#%F0%9F%A6%88%20%F0%9F%87%AE%F0%9F%87%B9%20Italy%20%E2%80%94%20Palermo%20%28149.22.91.161%29",
     ]
 
     def _endpoints(self, latency=0.0):

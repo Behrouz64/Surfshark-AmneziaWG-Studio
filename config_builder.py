@@ -419,8 +419,8 @@ def build_shadowrocket_wg_url(
     - Lowercase obfsParam keys, in the order of the reference export: jc, jmin, jmax, s1, s2, h1..h4
     - String values inside obfsParam, e.g. {"jc":"4",...}
 
-    The phone app passes title_prefix="" and show_latency=False to produce the reference
-    title, "🇮🇹 Italy — Milan (195.86.6.249)". The desktop default keeps its shark prefix.
+    The phone app passes show_latency=False so the title has no ping. The shark prefix stays
+    on both, and title_prefix can be set to "" for a title without it.
     """
     params = amnezia_params or AmneziaParams.iran_preset()
     priv_key = user_interface.get("private_key", "").strip()

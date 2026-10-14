@@ -192,10 +192,8 @@ def build_endpoint_wg_link(endpoint: Endpoint, ui: UserInterfaceConfig, params: 
         "latency_ms": endpoint.latency_ms if endpoint.has_latency else None,
         "is_domain": False,
     }
-    # Reference title: flag, country, city and IP only, without the shark prefix or the ping.
-    return build_shadowrocket_wg_url(
-        server_info, _wg_user_interface(ui), params, title_prefix="", show_latency=False,
-    )
+    # Title as in the reference export: shark, flag, country, city and IP. No ping in the title.
+    return build_shadowrocket_wg_url(server_info, _wg_user_interface(ui), params, show_latency=False)
 
 
 def build_group_wg_links_text(endpoints: Sequence[Endpoint], ui: UserInterfaceConfig, params: AmneziaParams) -> str:
