@@ -2,6 +2,20 @@ name: Build iOS IPA (unsigned)
 
 on:
   workflow_dispatch:
+  push:
+    branches: [claude/dreamy-archimedes-sv1bcc]
+    paths:
+      - 'phone/**'
+      - 'scripts/sync_phone.py'
+      - '.github/workflows/build-ios.yml'
+      - 'mobile_*.py'
+      - 'checker.py'
+      - 'config_builder.py'
+      - 'browser_harvest.py'
+      - 'dns_resolver.py'
+      - 'scan_cache.py'
+      - 'vpn_detector.py'
+      - 'surfshark_servers.json'
 
 jobs:
   ios:
