@@ -621,6 +621,29 @@ class TestMobileUiWithMockPage(unittest.TestCase):
 
 
 class TestTokenGate(unittest.TestCase):
+    def test_reconnect_with_token_in_new_route_unlocks_the_app(self):
+        """A reconnected browser keeps its session. A route change carrying ?t= must unlock it."""
+        import mobile_app
+        from flet.core.querystring import QueryString
+
+        page = MagicMock()
+        page.client_ip = "100.64.0.1"
+        page.url = "http://100.64.0.1:8550"
+        page.route = "/"
+        page.query = QueryString(page=page)
+        page.controls = []
+        mobile_app.main(page, token="tok")
+        self.assertIsNotNone(page.on_route_change)  # the gate listens for route changes
+        self.assertNotIsInstance(page.navigation_bar, ft.NavigationBar, "no app screen before the token is accepted")
+        self.assertTrue(any(
+            "دسترسی ممنوع" in str(getattr(c.args[0], "value", "")) for c in page.add.call_args_list
+        ))
+
+        page.route = "/?t=tok"
+        page.on_route_change(None)
+        self.assertIsNotNone(page.navigation_bar)
+        self.assertEqual(len(page.navigation_bar.destinations), 4)
+
     def test_token_is_read_from_real_flet_query_after_refresh(self):
         """Flet's QueryString is empty until refreshed, so a token in the route must still be seen."""
         import mobile_app

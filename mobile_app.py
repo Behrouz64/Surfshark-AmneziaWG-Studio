@@ -942,19 +942,45 @@ class MobileStudioApp:
 
 
 def main(page: ft.Page, token: str = ""):
-    """Flet entry point. When a token is set, remote clients must present it as ?t=<token>."""
-    if token and not _is_authorized(page, token):
-        page.title = "Surfshark AWG"
-        page.theme_mode = ft.ThemeMode.DARK
-        page.bgcolor = BG
-        page.padding = 24
-        page.add(ft.Text("دسترسی ممنوع", size=22, weight=ft.FontWeight.BOLD, color=ERROR))
-        page.add(ft.Text(
-            "آدرس کامل را که در ترمینال کامپیوتر نمایش داده شده (شامل ?t=...) در مرورگر گوشی باز کنید.",
-            color=MUTED,
-        ))
+    """
+    Flet entry point. When a token is set, every visitor must present it as ?t=<token>.
+
+    A browser that reconnects keeps its Flet session, so main() runs only once per session.
+    The check therefore runs again on every route change, which Flet sends when the reconnecting
+    browser's route (with ?t=...) differs from the stored one.
+    """
+    if not token:
+        MobileStudioApp(page)
         return
-    MobileStudioApp(page)
+
+    state = {"app": None, "denied": False}
+
+    def _gate(_e=None):
+        if state["app"] is not None:
+            return
+        if _is_authorized(page, token):
+            page.controls.clear()
+            state["app"] = MobileStudioApp(page)
+            return
+        if not state["denied"]:
+            state["denied"] = True
+            _show_denied(page)
+            page.update()
+
+    page.on_route_change = _gate
+    _gate()
+
+
+def _show_denied(page: ft.Page):
+    page.title = "Surfshark AWG"
+    page.theme_mode = ft.ThemeMode.DARK
+    page.bgcolor = BG
+    page.padding = 24
+    page.add(ft.Text("دسترسی ممنوع", size=22, weight=ft.FontWeight.BOLD, color=ERROR))
+    page.add(ft.Text(
+        "آدرس کامل را که در ترمینال کامپیوتر نمایش داده شده (شامل ?t=...) در مرورگر باز کنید.",
+        color=MUTED,
+    ))
 
 
 def _query_token(page: ft.Page) -> Optional[str]:
