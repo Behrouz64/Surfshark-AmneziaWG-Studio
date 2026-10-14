@@ -36,7 +36,7 @@ from mobile_core import (
     filter_endpoints,
     group_by_country,
     has_usable_private_key,
-    is_usable_client_key,
+    private_key_error,
     params_for_preset,
     qr_available,
     qr_matrix,
@@ -183,8 +183,9 @@ class PhoneCli:
 
     def set_key(self) -> bool:
         key = self._secret("PrivateKey (۴۴ کاراکتر، پنهان): ").strip()
-        if not is_usable_client_key(key):
-            self._say("فرمت کلید درست نیست؛ کلید WireGuard باید ۴۴ کاراکتر باشد و با = تمام شود.")
+        problem = private_key_error(key)
+        if problem:
+            self._say(problem)
             return False
         self._ui().private_key = key
         self._say("کلید فقط در حافظه‌ی همین اجرا نگه داشته می‌شود و روی دیسک نوشته نمی‌شود.")

@@ -190,6 +190,10 @@ class TestPhoneCliFlows(PhoneCliTestCase):
         self.assertTrue(any("utun3" in line for line in self.lines))
 
 
+def has_key_after_refusal(cli):
+    return bool(cli._ui().private_key)
+
+
 class TestPlaceholderKeyIsNotUsable(PhoneCliTestCase):
     """The project's dummy key (used by the scanner) must never count as the user's PrivateKey."""
 
@@ -199,6 +203,17 @@ class TestPlaceholderKeyIsNotUsable(PhoneCliTestCase):
         self.assertFalse(is_usable_client_key(DEFAULT_DUMMY_CLIENT_KEY))
         self.assertFalse(has_usable_private_key(UserInterfaceConfig(private_key=DEFAULT_DUMMY_CLIENT_KEY)))
         self.assertTrue(is_usable_client_key(TEST_KEY))
+
+    def test_entering_the_dummy_key_says_why_it_is_refused(self):
+        from checker import DEFAULT_DUMMY_CLIENT_KEY
+        from mobile_core import KEY_FORMAT_MESSAGE, KEY_PLACEHOLDER_MESSAGE, private_key_error
+        self.assertEqual(private_key_error(DEFAULT_DUMMY_CLIENT_KEY), KEY_PLACEHOLDER_MESSAGE)
+        self.assertEqual(private_key_error("not a key"), KEY_FORMAT_MESSAGE)
+        self.assertEqual(private_key_error(TEST_KEY), "")
+        cli = self.make(["1", "0"], secret=DEFAULT_DUMMY_CLIENT_KEY)
+        cli.run()
+        self.assertTrue(any(KEY_PLACEHOLDER_MESSAGE in line for line in self.lines))
+        self.assertFalse(has_key_after_refusal(cli))
 
     def test_copy_with_the_dummy_key_asks_for_the_real_key_first(self):
         from checker import DEFAULT_DUMMY_CLIENT_KEY

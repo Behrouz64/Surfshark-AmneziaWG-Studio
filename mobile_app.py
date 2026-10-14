@@ -29,7 +29,7 @@ from browser_harvest import DEFAULT_DATA_FILE, BlueprintData, load_blueprint
 from config_builder import country_code_to_flag
 from mobile_core import (
     ANY_CONTINENT,
-    is_usable_client_key,
+    private_key_error,
     qr_available,
     qr_dark_runs,
     qr_matrix,
@@ -938,8 +938,9 @@ class MobileStudioApp:
 
         def _save(_e):
             key = (key_field.value or "").strip()
-            if not is_usable_client_key(key):
-                error_text.value = "فرمت کلید درست نیست. کلید WireGuard باید ۴۴ کاراکتری باشد."
+            problem = private_key_error(key)
+            if problem:
+                error_text.value = problem
                 self._update()
                 return
             self.blueprint.user_interface.private_key = key

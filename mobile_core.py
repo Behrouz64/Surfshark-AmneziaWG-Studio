@@ -367,6 +367,23 @@ def is_usable_client_key(key: Optional[str]) -> bool:
     return is_valid_wg_key(key) and not is_placeholder_key(key) and not is_placeholder_client_key(key)
 
 
+KEY_FORMAT_MESSAGE = "فرمت کلید درست نیست. کلید WireGuard باید ۴۴ کاراکتر باشد و با = تمام شود."
+KEY_PLACEHOLDER_MESSAGE = (
+    "این کلید، کلید نمونه‌ی خود برنامه است و با Surfshark کار نمی‌کند. "
+    "کلید PrivateKey اکانت Surfshark خودتان را وارد کنید (خط PrivateKey در فایل کانفیگ WireGuard شما)."
+)
+
+
+def private_key_error(key: Optional[str]) -> str:
+    """'' when the key can be used. Otherwise the reason, in Persian, for the key dialog."""
+    key = (key or "").strip()
+    if not is_valid_wg_key(key):
+        return KEY_FORMAT_MESSAGE
+    if is_usable_client_key(key):
+        return ""
+    return KEY_PLACEHOLDER_MESSAGE
+
+
 def has_usable_private_key(ui: UserInterfaceConfig) -> bool:
     """True when the stored PrivateKey is the user's own key, so configs built from it can work."""
     return is_usable_client_key(ui.private_key)
