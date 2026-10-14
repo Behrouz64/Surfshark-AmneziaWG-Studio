@@ -80,48 +80,62 @@ Open Terminal in this directory and run:
 This automatically initializes a Python virtual environment, installs dependencies, and launches the desktop GUI.
 
 ### 2. Manual Setup
+Run these one at a time from the project folder:
 ```bash
-# Create and activate virtual environment
 python3 -m venv .venv
 source .venv/bin/activate
-
-# Install dependencies
 pip install -r requirements.txt
-
-# (Optional, for Stage A browser login) Install Playwright browser
-playwright install chromium
-
-# Launch Desktop GUI
 python3 main.py
 ```
+Optional, only for the Stage A browser login: after activating the venv, run `playwright install chromium`.
 
 ### 3. Command Line (Headless / Automated Scan)
-To run resolution and testing directly from the command line:
+To run resolution and testing directly from the command line, and export the working configs as a ZIP:
 ```bash
-# Run CLI scan and automatically export working configs to ZIP:
 python3 main.py --cli-scan --export-zip
 ```
 
 ### 4. Run the Tests on a Mac (Python 3.11)
 The tests use Python 3.11 and the pinned `flet==0.28.3` from `requirements.txt`. Flet 1.x changed APIs the desktop UI relies on, so do not upgrade it.
+
+Paste the commands one line at a time. Do not paste lines that start with `#`: zsh (the default macOS shell) runs them as commands and prints errors.
+
+First, get the code on the branch. If the folder does not exist yet:
 ```bash
-brew install python@3.11          # once
-./scripts/mac_test.sh             # creates .venv, installs requirements, runs all tests
+git clone -b claude/dreamy-archimedes-sv1bcc https://github.com/Behrouz64/Surfshark-AmneziaWG-Studio
+cd Surfshark-AmneziaWG-Studio
 ```
-Or by hand, from the project folder:
+If the folder already exists, go into it and update it:
 ```bash
-python3.11 -m venv .venv && source .venv/bin/activate
-python -m pip install -r requirements.txt
-python -m unittest -v
+cd Surfshark-AmneziaWG-Studio
+git pull
+```
+Check that you are in the right place. The first command must print `claude/dreamy-archimedes-sv1bcc`:
+```bash
+git branch --show-current
+```
+Install Python 3.11 once, then run the tests:
+```bash
+brew install python@3.11
+./scripts/mac_test.sh
 ```
 The last line must report `OK` with a non-zero test count (about 110). The tests write only to temp folders and never read or change Shadowrocket.
 
+If you prefer to run the steps by hand from the project folder:
+```bash
+python3.11 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
+python -m unittest -v
+```
+
 ### 5. Phone Version (Mobile UI on your local network)
 Runs the same scanner with a phone-sized UI. It never controls Shadowrocket (no Shadowrocket storage, no app control), but it copies `wg://` links that you paste into Shadowrocket on iPhone. Both copy formats are always available:
+Start it with:
 ```bash
-python3 main.py --mobile            # or: ./run.sh --mobile
-python3 main.py --mobile --port 9000
+python3 main.py --mobile
 ```
+`./run.sh --mobile` does the same and creates the venv first. To use another port, add `--port 9000`.
 1. The terminal prints a link like `http://<LAN-IP>:8550/?t=<token>`. Open it on the phone while it is on the same Wi-Fi or hotspot.
 2. The token is required for every visitor, including this computer. Anyone who has the link can copy your WireGuard key, so do not share it. Restarting the app creates a new token.
 3. The page uses plain HTTP, so use it only on your home Wi-Fi or your own hotspot, never on public Wi-Fi.
