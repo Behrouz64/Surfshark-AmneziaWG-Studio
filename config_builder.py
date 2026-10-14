@@ -405,6 +405,9 @@ def build_shadowrocket_wg_url(
     server_info: dict,
     user_interface: dict,
     amnezia_params: Optional[AmneziaParams] = None,
+    *,
+    title_prefix: str = "🦈 ",
+    show_latency: bool = True,
 ) -> str:
     """
     Constructs an AmneziaWG-compatible `wg://` URI for Shadowrocket Local Servers.
@@ -413,7 +416,11 @@ def build_shadowrocket_wg_url(
 
     Matches exact schema of working WireGuard servers in Shadowrocket:
     - Clean IP address without CIDR mask (e.g. '10.14.0.2', not '10.14.0.2/16')
-    - Lowercase obfsParam keys: s1, h2, jmax, s2, h3, jc, jmin, h1, h4
+    - Lowercase obfsParam keys, in the order of the reference export: jc, jmin, jmax, s1, s2, h1..h4
+    - String values inside obfsParam, e.g. {"jc":"4",...}
+
+    The phone app passes title_prefix="" and show_latency=False to produce the reference
+    title, "🇮🇹 Italy — Milan (195.86.6.249)". The desktop default keeps its shark prefix.
     """
     params = amnezia_params or AmneziaParams.iran_preset()
     priv_key = user_interface.get("private_key", "").strip()
@@ -432,20 +439,20 @@ def build_shadowrocket_wg_url(
     flag = country_code_to_flag(country_code) if country_code else "🌐"
     is_domain = server_info.get("is_domain", False)
     latency = server_info.get("latency_ms")
-    lat_tag = f" — {int(latency)}ms" if latency and latency < 9000 and not is_domain else ""
-    title = f"🦈 {flag} {raw_country} — {raw_city} ({endpoint}){lat_tag}"
+    lat_tag = f" — {int(latency)}ms" if show_latency and latency and latency < 9000 and not is_domain else ""
+    title = f"{title_prefix}{flag} {raw_country} — {raw_city} ({endpoint}){lat_tag}"
 
-    # Build obfsParam JSON structure recognized by Shadowrocket DLWAmneziaWGSettings
-    # Strictly lowercase keys matching Shadowrocket internal schema
+    # Build obfsParam JSON structure recognized by Shadowrocket DLWAmneziaWGSettings.
+    # Lowercase keys in the reference order; the values are strings, as in the reference export.
     obfs_dict = {
-        "s1": str(params.s1),
-        "h2": str(params.h2),
-        "jmax": str(params.jmax),
-        "s2": str(params.s2),
-        "h3": str(params.h3),
         "jc": str(params.jc),
         "jmin": str(params.jmin),
+        "jmax": str(params.jmax),
+        "s1": str(params.s1),
+        "s2": str(params.s2),
         "h1": str(params.h1),
+        "h2": str(params.h2),
+        "h3": str(params.h3),
         "h4": str(params.h4),
     }
     obfs_json = json.dumps(obfs_dict, separators=(",", ":"))

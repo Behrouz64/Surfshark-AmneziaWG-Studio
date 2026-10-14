@@ -169,6 +169,8 @@ class TestCopyFormats(unittest.TestCase):
             },
             {"private_key": REAL_KEY, "address": "10.14.0.2/16", "dns": "162.252.172.57"},
             self.params,
+            title_prefix="",
+            show_latency=False,
         )
         self.assertEqual(build_endpoint_wg_link(ep, _ui(), self.params), expected)
 
@@ -788,6 +790,49 @@ class TestPersianText(unittest.TestCase):
         lines = decoded.split("\n")
         self.assertEqual(len(lines), 2)
         self.assertTrue(all(line.startswith("wg://") for line in lines))
+
+
+class TestShadowrocketReferenceLinks(unittest.TestCase):
+    """The phone's wg:// links must match this reference export byte for byte."""
+
+    REFERENCE = [
+        "wg://195.86.6.249:51820?publicKey=9h4WUC/U%2BWnr58UAqZCitc5Cl0nf3D9IzFQMT4IsmUk%3D&privateKey=cF4B4RXTVug8PI2%2BmDxm8f1G/Ro0NHuWeO6jyOWRp18%3D&ip=10.2.0.2&dns=10.2.0.1%2C%202a07%3Ab944%3A%3A2%3A1&mtu=1280&udp=1&keepalive=25&obfs=amneziawg&obfsParam=%7B%22jc%22%3A%224%22%2C%22jmin%22%3A%2250%22%2C%22jmax%22%3A%221000%22%2C%22s1%22%3A%220%22%2C%22s2%22%3A%220%22%2C%22h1%22%3A%221%22%2C%22h2%22%3A%222%22%2C%22h3%22%3A%223%22%2C%22h4%22%3A%224%22%7D#%F0%9F%87%AE%F0%9F%87%B9%20Italy%20%E2%80%94%20Milan%20%28195.86.6.249%29",
+        "wg://149.22.91.161:51820?publicKey=4D4PkMrszUx3%2BRj4qLZIH1r7s6VAjS28sl34VG5%2BJyE%3D&privateKey=cF4B4RXTVug8PI2%2BmDxm8f1G/Ro0NHuWeO6jyOWRp18%3D&ip=10.2.0.2&dns=10.2.0.1%2C%202a07%3Ab944%3A%3A2%3A1&mtu=1280&udp=1&keepalive=25&obfs=amneziawg&obfsParam=%7B%22jc%22%3A%224%22%2C%22jmin%22%3A%2250%22%2C%22jmax%22%3A%221000%22%2C%22s1%22%3A%220%22%2C%22s2%22%3A%220%22%2C%22h1%22%3A%221%22%2C%22h2%22%3A%222%22%2C%22h3%22%3A%223%22%2C%22h4%22%3A%224%22%7D#%F0%9F%87%AE%F0%9F%87%B9%20Italy%20%E2%80%94%20Palermo%20%28149.22.91.161%29",
+    ]
+
+    def _endpoints(self, latency=0.0):
+        from mobile_core import Endpoint
+        return [
+            Endpoint(country="Italy", country_code="IT", city="Milan", hostname="it-mil.prod.surfshark.com",
+                     ip="195.86.6.249", port=51820, public_key="9h4WUC/U+Wnr58UAqZCitc5Cl0nf3D9IzFQMT4IsmUk=",
+                     latency_ms=latency),
+            Endpoint(country="Italy", country_code="IT", city="Palermo", hostname="it-pal.prod.surfshark.com",
+                     ip="149.22.91.161", port=51820, public_key="4D4PkMrszUx3+Rj4qLZIH1r7s6VAjS28sl34VG5+JyE=",
+                     latency_ms=latency),
+        ]
+
+    def _ui(self):
+        from browser_harvest import UserInterfaceConfig
+        return UserInterfaceConfig(private_key="cF4B4RXTVug8PI2+mDxm8f1G/Ro0NHuWeO6jyOWRp18=",
+                                   address="10.2.0.2/32", dns="10.2.0.1, 2a07:b944::2:1")
+
+    def test_each_link_matches_the_reference_export(self):
+        from mobile_core import build_endpoint_wg_link
+        from config_builder import AmneziaParams
+        for endpoint, reference in zip(self._endpoints(), self.REFERENCE):
+            self.assertEqual(build_endpoint_wg_link(endpoint, self._ui(), AmneziaParams.iran_preset()), reference)
+
+    def test_group_text_is_the_reference_lines_joined_by_newlines(self):
+        from mobile_core import build_group_wg_links_text
+        from config_builder import AmneziaParams
+        text = build_group_wg_links_text(self._endpoints(), self._ui(), AmneziaParams.iran_preset())
+        self.assertEqual(text, "\n".join(self.REFERENCE))
+
+    def test_measured_ping_does_not_change_the_title(self):
+        from mobile_core import build_endpoint_wg_link
+        from config_builder import AmneziaParams
+        link = build_endpoint_wg_link(self._endpoints(latency=120.0)[0], self._ui(), AmneziaParams.iran_preset())
+        self.assertEqual(link, self.REFERENCE[0])
 
 
 class TestGuideMatchesUi(unittest.TestCase):
