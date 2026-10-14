@@ -37,6 +37,8 @@ from mobile_core import (
     build_group_wg_links_text,
     endpoints_from_working_configs,
     continent_by_country_code,
+    is_mobile_platform,
+    prepare_data_folder,
     continents_present,
     filter_endpoints,
     group_by_country,
@@ -557,6 +559,35 @@ class TestMobileUiWithMockPage(unittest.TestCase):
         self.assertIn("wg://", joined)
         self.assertEqual(len(labels), 5)
 
+    def test_phone_skips_desktop_vpn_probe_and_keeps_content_clear_of_notch(self):
+        import mobile_app
+        from flet.core.types import PagePlatform
+
+        self._vpn_patch.stop()  # setUp hides the probe; this test needs the real call path
+        page = _fake_page("127.0.0.1")
+        page.platform = PagePlatform.IOS
+        with patch.object(mobile_app, "detect_active_vpn", side_effect=AssertionError("must not probe on phones")):
+            app = mobile_app.MobileStudioApp(page)
+        self.assertTrue(app.is_mobile)
+        self.assertIsNone(app.vpn)
+        self.assertTrue(any(isinstance(c.args[0], ft.SafeArea) for c in page.add.call_args_list))
+        self.assertTrue(app.scan_view.controls[2].visible if hasattr(app.scan_view.controls[2], "visible") else True)
+
+    def test_desktop_still_probes_vpn(self):
+        import mobile_app
+        from flet.core.types import PagePlatform
+        from vpn_detector import VpnStatus
+
+        self._vpn_patch.stop()  # setUp hides the probe; this test needs the real call path
+        page = _fake_page("127.0.0.1")
+        page.platform = PagePlatform.MACOS
+        status = VpnStatus(is_vpn_active=False, interface="en0", gateway="x",
+                           summary_fa="", summary_en="", warning_fa="", warning_en="")
+        with patch.object(mobile_app, "detect_active_vpn", return_value=status) as probe:
+            app = mobile_app.MobileStudioApp(page)
+        probe.assert_called()
+        self.assertFalse(app.is_mobile)
+
     def test_dashboard_tiles_and_appbar(self):
         app, page = self._app()
         self.assertIsInstance(page.appbar, ft.AppBar)
@@ -686,6 +717,38 @@ class TestMobileUiWithMockPage(unittest.TestCase):
             start.assert_called_once()
 
 
+class TestMobilePlatform(unittest.TestCase):
+    def test_mobile_platforms_are_detected_from_enum_or_string(self):
+        from flet.core.types import PagePlatform
+
+        self.assertTrue(is_mobile_platform(PagePlatform.IOS))
+        self.assertTrue(is_mobile_platform(PagePlatform.ANDROID))
+        self.assertTrue(is_mobile_platform("android"))
+        self.assertFalse(is_mobile_platform(PagePlatform.MACOS))
+        self.assertFalse(is_mobile_platform(PagePlatform.WINDOWS))
+        self.assertFalse(is_mobile_platform(None))
+        self.assertFalse(is_mobile_platform(MagicMock()))
+
+    def test_first_writable_folder_is_chosen_and_seed_copied(self):
+        tmp = tempfile.mkdtemp()
+        try:
+            blocker = os.path.join(tmp, "a_file")
+            with open(blocker, "w", encoding="utf-8") as f:
+                f.write("not a folder")
+            seed = os.path.join(tmp, "seed.json")
+            with open(seed, "w", encoding="utf-8") as f:
+                f.write('{"seed": true}')
+            good = os.path.join(tmp, "data")
+
+            chosen = prepare_data_folder([os.path.join(blocker, "sub"), "", good], seed)
+            self.assertEqual(chosen, good)
+            with open(os.path.join(good, "seed.json"), encoding="utf-8") as f:
+                self.assertEqual(f.read(), '{"seed": true}')
+            self.assertIsNone(prepare_data_folder([os.path.join(blocker, "sub")], seed))
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
+
+
 class TestPhoneBundle(unittest.TestCase):
     """The iOS/Android build packages only phone/. Every module the phone app imports must be in the sync list."""
 
@@ -729,6 +792,7 @@ class TestPhoneBundle(unittest.TestCase):
     def test_phone_entry_point_is_tracked_and_calls_the_app(self):
         with open(os.path.join(REPO_ROOT, "phone", "main.py"), encoding="utf-8") as f:
             source = f.read()
+        self.assertIn("prepare_data_folder", source)
         self.assertIn("from mobile_app import main as mobile_main", source)
         self.assertIn("ft.app(target=mobile_main)", source)
 

@@ -28,6 +28,7 @@ from browser_harvest import DEFAULT_DATA_FILE, BlueprintData, is_placeholder_key
 from config_builder import country_code_to_flag, generate_qr_code_base64, is_valid_wg_key
 from mobile_core import (
     ANY_CONTINENT,
+    is_mobile_platform,
     continent_by_country_code,
     continents_present,
     filter_endpoints,
@@ -105,7 +106,8 @@ class MobileStudioApp:
         self.continent_filter: str = ANY_CONTINENT
         self.continent_map: Dict[str, str] = continent_by_country_code(self.blueprint.servers)
         self.current_tab: int = 0
-        self.vpn: Optional[VpnStatus] = _safe_vpn_status()
+        self.is_mobile: bool = is_mobile_platform(page.platform)
+        self.vpn: Optional[VpnStatus] = None if self.is_mobile else _safe_vpn_status()
 
         self.scanning: bool = False
         self.scan_phase: str = ""
@@ -164,7 +166,7 @@ class MobileStudioApp:
         )
 
         self.host = ft.Container(expand=True, padding=ft.padding.symmetric(horizontal=14, vertical=12))
-        page.add(self.host)
+        page.add(ft.SafeArea(content=self.host, expand=True))
 
     def _on_nav(self, e):
         self._show_tab(int(e.control.selected_index))
@@ -262,7 +264,7 @@ class MobileStudioApp:
         self.blueprint = load_blueprint(DEFAULT_DATA_FILE)
         self.continent_map = continent_by_country_code(self.blueprint.servers)
         self._load_cache()
-        self.vpn = _safe_vpn_status()
+        self.vpn = None if self.is_mobile else _safe_vpn_status()
         self._render_servers()
         self._render_settings()
         self._refresh_fab()
@@ -334,6 +336,17 @@ class MobileStudioApp:
             controls=[
                 ft.Text("اسکن آی‌پی‌ها", size=20, weight=ft.FontWeight.BOLD),
                 self.scan_vpn_banner,
+                ft.Container(
+                    visible=self.is_mobile,
+                    bgcolor=WARN_BG,
+                    border_radius=10,
+                    padding=10,
+                    content=ft.Text(
+                        "VPN را خودتان خاموش کنید. برنامه روی گوشی وضعیت VPN را نمی‌بیند.",
+                        color=WARN,
+                        size=12,
+                    ),
+                ),
                 ft.Container(
                     bgcolor=CARD,
                     border_radius=14,

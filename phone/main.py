@@ -2,39 +2,28 @@
 Entry point of the phone app (iOS and Android). The shared modules are copied next to this file
 by scripts/sync_phone.py before the build.
 
-The app bundle is read-only on iOS, so the app works in a writable folder: the first of
-~/Documents or ~ that accepts a file. The blueprint is copied there on the first run.
+The app bundle is read-only on mobile, so the app works in the first writable folder it finds.
+The blueprint (surfshark_servers.json) is copied there on the first run.
 """
 
 import os
-import shutil
 
 import flet as ft
 
+from mobile_core import prepare_data_folder
 
-def _prepare_writable_folder():
-    here = os.path.dirname(os.path.abspath(__file__))
-    for candidate in (os.path.join(os.path.expanduser("~"), "Documents"), os.path.expanduser("~")):
-        try:
-            os.makedirs(candidate, exist_ok=True)
-            probe = os.path.join(candidate, ".write_test")
-            with open(probe, "w", encoding="utf-8") as f:
-                f.write("ok")
-            os.remove(probe)
-        except OSError:
-            continue
-        seed = os.path.join(here, "surfshark_servers.json")
-        target = os.path.join(candidate, "surfshark_servers.json")
-        if not os.path.exists(target) and os.path.exists(seed):
-            shutil.copyfile(seed, target)
-        os.chdir(candidate)
-        return candidate
-    return here
+_HERE = os.path.dirname(os.path.abspath(__file__))
+_CANDIDATES = [
+    os.path.join(os.path.expanduser("~"), "Documents"),
+    os.path.expanduser("~"),
+    os.environ.get("FLET_APP_STORAGE_DATA", ""),
+    _HERE,
+]
+_folder = prepare_data_folder(_CANDIDATES, os.path.join(_HERE, "surfshark_servers.json"))
+if _folder:
+    os.chdir(_folder)
 
-
-_prepare_writable_folder()
-
-from mobile_app import main as mobile_main  # noqa: E402  (imported after chdir: paths are relative)
+from mobile_app import main as mobile_main  # noqa: E402  (imported after chdir: data paths are relative)
 
 # Called at module level, not under __main__: mobile platforms load this file under another name.
 ft.app(target=mobile_main)

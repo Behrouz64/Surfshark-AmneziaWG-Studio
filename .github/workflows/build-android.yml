@@ -1,0 +1,70 @@
+name: Build Android APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [claude/dreamy-archimedes-sv1bcc]
+    paths:
+      - 'phone/**'
+      - 'scripts/sync_phone.py'
+      - '.github/workflows/build-android.yml'
+      - 'mobile_*.py'
+      - 'checker.py'
+      - 'config_builder.py'
+      - 'browser_harvest.py'
+      - 'dns_resolver.py'
+      - 'scan_cache.py'
+      - 'vpn_detector.py'
+      - 'surfshark_servers.json'
+
+jobs:
+  android:
+    name: Android APK (arm64)
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: subosito/flutter-action@v2
+        with:
+          # Flutter version bundled with flet==0.28.3
+          flutter-version: '3.24.3'
+          channel: stable
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Flet CLI
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install flet==0.28.3 httpx
+
+      - name: Copy shared modules into the phone app
+        run: python scripts/sync_phone.py
+
+      - name: Build the APK
+        working-directory: phone
+        run: flet build apk -v --arch arm64-v8a
+
+      - name: Collect the APK
+        run: |
+          set -e
+          mkdir -p dist
+          APK=$(find phone/build/apk -name '*.apk' | head -1)
+          if [ -z "$APK" ]; then
+            echo "No APK found. Files under phone/build:"
+            find phone/build -maxdepth 3
+            exit 1
+          fi
+          cp "$APK" dist/SurfsharkAmneziaWG-arm64.apk
+          ls -lh dist
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: surfshark-android-apk
+          path: dist/SurfsharkAmneziaWG-arm64.apk

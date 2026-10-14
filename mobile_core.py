@@ -22,6 +22,8 @@ from __future__ import annotations
 
 import hmac
 import logging
+import os
+import shutil
 from dataclasses import dataclass, field
 from typing import Callable, Dict, Iterable, List, Optional, Sequence, Tuple
 
@@ -405,3 +407,36 @@ def filter_endpoints(
             continue
         result.append(endpoint)
     return result
+
+
+MOBILE_PLATFORMS = ("ios", "android", "android_tv")
+
+
+def is_mobile_platform(platform) -> bool:
+    """True for iOS and Android. Accepts Flet's PagePlatform enum or its string value."""
+    value = getattr(platform, "value", platform)
+    return str(value or "").lower() in MOBILE_PLATFORMS
+
+
+def prepare_data_folder(candidates: Sequence[str], seed_file: str) -> Optional[str]:
+    """
+    Returns the first candidate folder that can be created and written to, after copying
+    seed_file into it when it is not there yet. Returns None when no candidate works.
+    Mobile bundles are read-only, so the app must run from such a folder.
+    """
+    for folder in candidates:
+        if not folder:
+            continue
+        try:
+            os.makedirs(folder, exist_ok=True)
+            probe = os.path.join(folder, ".write_test")
+            with open(probe, "w", encoding="utf-8") as f:
+                f.write("ok")
+            os.remove(probe)
+        except OSError:
+            continue
+        target = os.path.join(folder, os.path.basename(seed_file))
+        if not os.path.exists(target) and os.path.exists(seed_file):
+            shutil.copyfile(seed_file, target)
+        return folder
+    return None
