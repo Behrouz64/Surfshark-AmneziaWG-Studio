@@ -19,3 +19,10 @@ scan_cache.json
 .DS_Store
 .AppleDouble
 .LSOverride
+
+# Phone app: copies made by scripts/sync_phone.py (phone/main.py and pyproject.toml are tracked)
+phone/*.py
+!phone/main.py
+phone/surfshark_servers.json
+phone/build/
+phone/build

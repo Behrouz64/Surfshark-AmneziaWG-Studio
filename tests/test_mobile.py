@@ -686,6 +686,53 @@ class TestMobileUiWithMockPage(unittest.TestCase):
             start.assert_called_once()
 
 
+class TestPhoneBundle(unittest.TestCase):
+    """The iOS/Android build packages only phone/. Every module the phone app imports must be in the sync list."""
+
+    def _local_imports(self, name, root_modules):
+        import ast
+
+        with open(os.path.join(REPO_ROOT, name), encoding="utf-8") as f:
+            tree = ast.parse(f.read(), filename=name)
+        found = set()
+        for node in ast.walk(tree):
+            names = []
+            if isinstance(node, ast.Import):
+                names = [alias.name.split(".")[0] for alias in node.names]
+            elif isinstance(node, ast.ImportFrom) and node.module and node.level == 0:
+                names = [node.module.split(".")[0]]
+            for module in names:
+                if module + ".py" in root_modules:
+                    found.add(module + ".py")
+        return found
+
+    def test_sync_list_covers_every_local_import_of_the_phone_app(self):
+        import runpy
+
+        sync = runpy.run_path(os.path.join(REPO_ROOT, "scripts", "sync_phone.py"), run_name="sync_phone")
+        listed = set(sync["PHONE_MODULES"])
+        root_modules = {n for n in os.listdir(REPO_ROOT) if n.endswith(".py")}
+
+        needed, queue = set(), ["mobile_app.py"]
+        while queue:
+            name = queue.pop()
+            if name in needed:
+                continue
+            needed.add(name)
+            queue.extend(self._local_imports(name, root_modules))
+
+        self.assertEqual(needed - listed, set(), "phone app imports modules that scripts/sync_phone.py does not copy")
+        for name in listed:
+            self.assertTrue(os.path.exists(os.path.join(REPO_ROOT, name)), f"{name} is listed but missing")
+        self.assertIn("surfshark_servers.json", sync["PHONE_DATA"])
+
+    def test_phone_entry_point_is_tracked_and_calls_the_app(self):
+        with open(os.path.join(REPO_ROOT, "phone", "main.py"), encoding="utf-8") as f:
+            source = f.read()
+        self.assertIn("from mobile_app import main as mobile_main", source)
+        self.assertIn("ft.app(target=mobile_main)", source)
+
+
 class TestTokenGate(unittest.TestCase):
     def test_reconnect_with_token_in_new_route_unlocks_the_app(self):
         """A reconnected browser keeps its session. A route change carrying ?t= must unlock it."""

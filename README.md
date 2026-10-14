@@ -154,6 +154,32 @@ Clipboard access in a phone browser over plain HTTP can be blocked by the browse
 
 ---
 
+### 6. iPhone App (unsigned IPA)
+The phone version can also run on the iPhone itself, without a computer. The app scans from the iPhone's own connection.
+
+**Build the IPA on GitHub (no Mac needed for this step):**
+1. Push the branch, open the repository on GitHub, then Actions → **Build iOS IPA (unsigned)** → **Run workflow**.
+2. When the run is green, download the artifact `surfshark-ios-unsigned` (it contains `SurfsharkAmneziaWG-unsigned.ipa`).
+
+**Install it with a free Apple ID (Sideloadly, on a Mac or Windows PC):**
+1. Install Sideloadly, connect the iPhone with a cable, and trust the computer on the phone.
+2. Drag the `.ipa` into Sideloadly and enter your Apple ID. Sideloadly signs the app with it.
+3. On the iPhone, enable **Settings → Privacy & Security → Developer Mode** (iOS 16 and later), then restart.
+4. Open **Settings → General → VPN & Device Management**, and trust the developer profile.
+
+**Limits of a free Apple ID:** the signature expires after 7 days. Sideloadly's Auto Refresh re-signs it while the computer and the phone are on the same network. After that, install the IPA again. The app is not on the App Store.
+
+**Differences from the computer version:**
+- There is no QR code on the phone (the imaging library is not included in the iOS build). Copying configs and `wg://` links works.
+- The VPN is not detected automatically on iOS. Turn the VPN off yourself before the scan.
+- The PrivateKey is kept in memory only, so enter it again after the app restarts.
+
+**Building locally on a Mac** (needs Xcode): run `python3 scripts/sync_phone.py`, then `cd phone` and `flet build ipa -v`. The archive appears under `phone/build/ipa`.
+
+Before publishing, change `org` in `phone/pyproject.toml` to your own reverse-domain name. It becomes part of the bundle ID.
+
+---
+
 ## File Structure
 
 - `main.py`: Application entrypoint (Desktop GUI or headless CLI scanner).

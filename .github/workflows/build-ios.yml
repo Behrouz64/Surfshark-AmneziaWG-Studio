@@ -1,0 +1,52 @@
+name: Build iOS IPA (unsigned)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  ios:
+    name: Unsigned iOS IPA
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          # Flutter version bundled with flet==0.28.3
+          flutter-version: '3.24.3'
+          channel: stable
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Flet CLI
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install flet==0.28.3 httpx
+
+      - name: Copy shared modules into the phone app
+        run: python scripts/sync_phone.py
+
+      - name: Build the app (unsigned archive)
+        working-directory: phone
+        run: flet build ipa -v
+
+      - name: Package the .app as an unsigned IPA
+        run: |
+          set -e
+          APP=$(find phone/build/ipa -type d -path '*.xcarchive/Products/Applications/*.app' | head -1)
+          if [ -z "$APP" ]; then
+            echo "No .app found in the archive. Files under phone/build/ipa:"
+            find phone/build/ipa -maxdepth 4
+            exit 1
+          fi
+          rm -rf dist && mkdir -p dist/Payload
+          cp -R "$APP" dist/Payload/
+          (cd dist && zip -qr SurfsharkAmneziaWG-unsigned.ipa Payload)
+          ls -lh dist
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: surfshark-ios-unsigned
+          path: dist/SurfsharkAmneziaWG-unsigned.ipa
