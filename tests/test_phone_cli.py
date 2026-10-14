@@ -190,5 +190,37 @@ class TestPhoneCliFlows(PhoneCliTestCase):
         self.assertTrue(any("utun3" in line for line in self.lines))
 
 
+class TestPlaceholderKeyIsNotUsable(PhoneCliTestCase):
+    """The project's dummy key (used by the scanner) must never count as the user's PrivateKey."""
+
+    def test_the_dummy_key_is_not_a_usable_key(self):
+        from checker import DEFAULT_DUMMY_CLIENT_KEY
+        from mobile_core import has_usable_private_key, is_usable_client_key
+        self.assertFalse(is_usable_client_key(DEFAULT_DUMMY_CLIENT_KEY))
+        self.assertFalse(has_usable_private_key(UserInterfaceConfig(private_key=DEFAULT_DUMMY_CLIENT_KEY)))
+        self.assertTrue(is_usable_client_key(TEST_KEY))
+
+    def test_copy_with_the_dummy_key_asks_for_the_real_key_first(self):
+        from checker import DEFAULT_DUMMY_CLIENT_KEY
+        # copy group, no real key given: nothing may reach the clipboard
+        cli = self.make(["5", "", "0"], secret="")
+        cli._ui().private_key = DEFAULT_DUMMY_CLIENT_KEY
+        cli.run()
+        self.assertEqual(self.clipboard_calls, [])
+        self.assertTrue(any("فرمت کلید درست نیست" in line for line in self.lines))
+
+    def test_scan_runs_without_the_real_key_like_the_app(self):
+        from checker import DEFAULT_DUMMY_CLIENT_KEY
+        calls = []
+
+        class Result:
+            working_configs = []
+
+        cli = self.make(["2", "0"], scan_fn=lambda *a, **k: calls.append(1) or Result())
+        cli._ui().private_key = DEFAULT_DUMMY_CLIENT_KEY
+        cli.run()
+        self.assertEqual(calls, [1])
+
+
 if __name__ == "__main__":
     unittest.main()

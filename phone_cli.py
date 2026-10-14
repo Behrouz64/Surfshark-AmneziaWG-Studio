@@ -17,8 +17,8 @@ import subprocess
 import sys
 from typing import Callable, List, Optional, Sequence
 
-from browser_harvest import DEFAULT_DATA_FILE, is_placeholder_key, load_blueprint
-from config_builder import country_code_to_flag, is_valid_wg_key
+from browser_harvest import DEFAULT_DATA_FILE, load_blueprint
+from config_builder import country_code_to_flag
 from mobile_core import (
     ANY_CONTINENT,
     DEFAULT_PRESET,
@@ -36,6 +36,7 @@ from mobile_core import (
     filter_endpoints,
     group_by_country,
     has_usable_private_key,
+    is_usable_client_key,
     params_for_preset,
     qr_available,
     qr_matrix,
@@ -182,7 +183,7 @@ class PhoneCli:
 
     def set_key(self) -> bool:
         key = self._secret("PrivateKey (۴۴ کاراکتر، پنهان): ").strip()
-        if not is_valid_wg_key(key) or is_placeholder_key(key):
+        if not is_usable_client_key(key):
             self._say("فرمت کلید درست نیست؛ کلید WireGuard باید ۴۴ کاراکتر باشد و با = تمام شود.")
             return False
         self._ui().private_key = key
@@ -356,8 +357,6 @@ class PhoneCli:
             self._say(f"VPN روشن است ({interface}). برای اسکن درست، اول VPN را خاموش کنید.")
             if self._ask("با VPN روشن ادامه می‌دهید؟ (y/N): ").lower() not in ("y", "yes"):
                 return
-        if not self.ensure_key():
-            return
         try:
             result = self.scan_fn(
                 self.blueprint,

@@ -25,10 +25,11 @@ from typing import Callable, Dict, List, Optional
 import flet as ft
 import flet.canvas as cv
 
-from browser_harvest import DEFAULT_DATA_FILE, BlueprintData, is_placeholder_key, load_blueprint
-from config_builder import country_code_to_flag, is_valid_wg_key
+from browser_harvest import DEFAULT_DATA_FILE, BlueprintData, load_blueprint
+from config_builder import country_code_to_flag
 from mobile_core import (
     ANY_CONTINENT,
+    is_usable_client_key,
     qr_available,
     qr_dark_runs,
     qr_matrix,
@@ -933,7 +934,7 @@ class MobileStudioApp:
 
         def _save(_e):
             key = (key_field.value or "").strip()
-            if not is_valid_wg_key(key) or is_placeholder_key(key):
+            if not is_usable_client_key(key):
                 error_text.value = "فرمت کلید درست نیست. کلید WireGuard باید ۴۴ کاراکتری باشد."
                 self._update()
                 return

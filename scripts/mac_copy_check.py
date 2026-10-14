@@ -113,17 +113,16 @@ def copy_roundtrip(text: str, copy_cmd: Sequence[str], paste_cmd: Sequence[str])
 
 def _load_inputs(count: int, private_key_arg: Optional[str]):
     from browser_harvest import DEFAULT_DATA_FILE, load_blueprint
-    from config_builder import is_valid_wg_key
-    from mobile_core import DEFAULT_PRESET, endpoints_from_working_configs, params_for_preset
+    from mobile_core import DEFAULT_PRESET, endpoints_from_working_configs, is_usable_client_key, params_for_preset
     from scan_cache import DEFAULT_SCAN_CACHE_FILE, load_scan_cache
 
     blueprint = load_blueprint(DEFAULT_DATA_FILE)
     ui = blueprint.user_interface
     key = (private_key_arg or ui.private_key or "").strip()
-    if not key or not is_valid_wg_key(key):
+    if not is_usable_client_key(key):
         key = getpass.getpass("PrivateKey from Surfshark (44 characters, hidden): ").strip()
-    if not is_valid_wg_key(key):
-        raise SystemExit("The PrivateKey is not a 44-character WireGuard key.")
+    if not is_usable_client_key(key):
+        raise SystemExit("That is not your own PrivateKey: it must be a 44-character WireGuard key, not a placeholder.")
     ui.private_key = key
 
     data = load_scan_cache(DEFAULT_SCAN_CACHE_FILE) or {}

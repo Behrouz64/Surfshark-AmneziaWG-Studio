@@ -30,7 +30,7 @@ from dataclasses import dataclass, field
 from typing import Callable, Dict, Iterable, List, Optional, Sequence, Tuple
 
 from browser_harvest import BlueprintData, UserInterfaceConfig, is_placeholder_key
-from checker import CheckResult, ScanMode, run_udp_scan_sync
+from checker import CheckResult, ScanMode, is_placeholder_client_key, run_udp_scan_sync
 from config_builder import (
     AmneziaParams,
     build_amnezia_config,
@@ -358,10 +358,18 @@ def run_mobile_scan(
     )
 
 
+def is_usable_client_key(key: Optional[str]) -> bool:
+    """
+    A real WireGuard PrivateKey that copies can use. The project's placeholder keys do not count:
+    the seed keys, and the dummy key the scanner uses for its probes (is_placeholder_client_key).
+    """
+    key = (key or "").strip()
+    return is_valid_wg_key(key) and not is_placeholder_key(key) and not is_placeholder_client_key(key)
+
+
 def has_usable_private_key(ui: UserInterfaceConfig) -> bool:
-    """True when the stored PrivateKey is a well-formed, non-placeholder WireGuard key."""
-    key = (ui.private_key or "").strip()
-    return is_valid_wg_key(key) and not is_placeholder_key(key)
+    """True when the stored PrivateKey is the user's own key, so configs built from it can work."""
+    return is_usable_client_key(ui.private_key)
 
 
 def is_access_token_valid(given: Optional[str], expected: str) -> bool:
