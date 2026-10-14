@@ -154,6 +154,21 @@ Clipboard access in a phone browser over plain HTTP can be blocked by the browse
 
 ---
 
+### 5a. Terminal Version (no browser)
+The same logic as the phone app, in the terminal. It works on the Mac with no browser and no network page:
+```bash
+.venv/bin/python phone_cli.py
+```
+The menu has the same steps: enter the PrivateKey (hidden, kept only in memory), scan, filter by continent and search, select servers, copy AmneziaWG configs and `wg://` links (group or single), the one-by-one copy queue, a QR code drawn with text blocks, and the guide. On a Mac the copy goes to the clipboard with `pbcopy`. Elsewhere the text is printed.
+
+To check the copy text through the real macOS clipboard, without the browser:
+```bash
+.venv/bin/python scripts/mac_copy_check.py
+```
+It copies a group of links, reads them back, and checks each line against the reference format. It writes the links to `copy_check_links.txt`, which is git-ignored and contains the PrivateKey. Delete it after the test.
+
+---
+
 ### 6. iPhone App (unsigned IPA)
 The phone version can also run on the iPhone itself, without a computer. The app scans from the iPhone's own connection.
 
@@ -187,6 +202,8 @@ Before publishing, change `org` in `phone/pyproject.toml` to your own reverse-do
 - `mobile_app.py`: Phone-sized Flet UI served with `--mobile` (no Shadowrocket integration).
 - `mobile_core.py`: Flet-free logic for the phone version: config, `wg://` link and group copy formats, copy queue, headless scan, and token check.
 - `mobile_guide.py`: the phone guide text in Persian and English, with a parity check that the two languages have the same structure.
+- `phone_cli.py`: the phone version in the terminal (same logic as the phone app, no browser).
+- `scripts/mac_copy_check.py`: checks the group copy text through the macOS clipboard, without a browser.
 - `scripts/mac_test.sh`: creates a Python 3.11 venv and runs the test suite (macOS).
 - `dns_resolver.py`: Anti-poisoning DoH multi-provider resolver and round-robin IP discovery.
 - `checker.py`: Concurrent UDP port 51820 reachability and RTT latency checker.
