@@ -36,6 +36,9 @@ from mobile_core import (
     build_group_config_text,
     build_group_wg_links_text,
     endpoints_from_working_configs,
+    continent_by_country_code,
+    continents_present,
+    filter_endpoints,
     group_by_country,
     has_usable_private_key,
     is_access_token_valid,
@@ -170,6 +173,36 @@ class TestCopyFormats(unittest.TestCase):
         self.assertEqual(len(lines), 2)
         self.assertTrue(lines[0].startswith("wg://185.1.1.1:51820?"))
         self.assertTrue(lines[1].startswith("wg://185.1.1.2:51820?"))
+
+
+class TestContinents(unittest.TestCase):
+    def setUp(self):
+        self.endpoints = endpoints_from_working_configs([
+            _working(endpoint_ip="185.1.1.1", latency_ms=78.0),
+            _working(endpoint_ip="5.2.3.4", country="Albania", country_code="AL", city="Tirana", latency_ms=240.0),
+            _working(country="Japan", country_code="JP", city="Tokyo", endpoint_ip="203.0.113.5", latency_ms=150.0),
+        ])
+        self.mapping = {"DE": "Europe", "AL": "Europe", "JP": "Asia"}
+
+    def test_mapping_comes_from_blueprint_servers(self):
+        servers = [
+            ServerMetadata(continent="Europe", country="Germany", country_code="de", city="Berlin", hostname="a"),
+            ServerMetadata(continent="", country="Nowhere", country_code="XX", city="x", hostname="b"),
+        ]
+        self.assertEqual(continent_by_country_code(servers), {"DE": "Europe"})
+
+    def test_filter_by_continent_and_query(self):
+        europe = filter_endpoints(self.endpoints, self.mapping, "Europe")
+        self.assertEqual([e.country_code for e in europe], ["DE", "AL"])
+        self.assertEqual(len(filter_endpoints(self.endpoints, self.mapping)), 3)
+        self.assertEqual([e.city for e in filter_endpoints(self.endpoints, self.mapping, "Asia", "tokyo")], ["Tokyo"])
+        self.assertEqual(filter_endpoints(self.endpoints, self.mapping, "Europe", "tokyo"), [])
+
+    def test_counts_per_continent_largest_first(self):
+        self.assertEqual(continents_present(self.endpoints, self.mapping), [("Europe", 2), ("Asia", 1)])
+
+    def test_unknown_country_goes_to_other(self):
+        self.assertEqual(continents_present(self.endpoints, {}), [("Other", 3)])
 
 
 class TestCopyQueue(unittest.TestCase):
@@ -523,6 +556,39 @@ class TestMobileUiWithMockPage(unittest.TestCase):
         self.assertIn("AmneziaWG", joined)
         self.assertIn("wg://", joined)
         self.assertEqual(len(labels), 5)
+
+    def test_dashboard_tiles_and_appbar(self):
+        app, page = self._app()
+        self.assertIsInstance(page.appbar, ft.AppBar)
+        tiles = app.dashboard_row.controls
+        self.assertEqual(len(tiles), 5)
+        self.assertEqual(tiles[0].content.controls[1].value, "3")  # healthy endpoints in _app()
+        app._toggle(app.endpoints[0].key, True)
+        app._render_servers()
+        self.assertEqual(app.dashboard_row.controls[4].content.controls[1].value, "1")
+
+    def test_continent_chip_filters_list_and_select_visible_is_scoped(self):
+        app, page = self._app()
+        app.endpoints = endpoints_from_working_configs([
+            _working(endpoint_ip="185.1.1.1", latency_ms=78.0),
+            _working(endpoint_ip="5.2.3.4", country="Albania", country_code="AL", city="Tirana", latency_ms=240.0),
+            _working(country="Japan", country_code="JP", city="Tokyo", endpoint_ip="203.0.113.5", latency_ms=150.0),
+        ])
+        app.continent_map = {"DE": "Europe", "AL": "Europe", "JP": "Asia"}
+        app._render_servers()
+        self.assertEqual(len(app.continent_row.controls), 3)  # all, Europe, Asia
+
+        app._set_continent("Asia")
+        self.assertEqual([t.title.value for t in app.country_list.controls], ["🇯🇵  Japan"])
+
+        app._set_continent("Europe")
+        europe = filter_endpoints(app.endpoints, app.continent_map, "Europe")
+        app._select_visible(europe)
+        self.assertEqual(app.selected, {e.key for e in europe})
+        self.assertEqual(len(app.selected), 2)
+
+        app._clear_selection_now()
+        self.assertEqual(app.selected, set())
 
     def test_guide_tab_switches_language_and_disables_active_button(self):
         app, page = self._app()

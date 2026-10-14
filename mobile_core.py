@@ -359,3 +359,49 @@ def is_access_token_valid(given: Optional[str], expected: str) -> bool:
     if not given or not expected:
         return False
     return hmac.compare_digest(given.encode("utf-8"), expected.encode("utf-8"))
+
+
+ANY_CONTINENT = ""
+OTHER_CONTINENT = "Other"
+
+
+def continent_by_country_code(servers: Iterable) -> Dict[str, str]:
+    """Maps a country code to its continent, using the continent field of the blueprint servers."""
+    mapping: Dict[str, str] = {}
+    for server in servers:
+        code = (getattr(server, "country_code", "") or "").upper()
+        continent = getattr(server, "continent", "") or ""
+        if code and continent:
+            mapping.setdefault(code, continent)
+    return mapping
+
+
+def continent_of(endpoint: Endpoint, mapping: Dict[str, str]) -> str:
+    return mapping.get((endpoint.country_code or "").upper(), OTHER_CONTINENT)
+
+
+def continents_present(endpoints: Sequence[Endpoint], mapping: Dict[str, str]) -> List[Tuple[str, int]]:
+    """(continent, endpoint count) pairs, largest continent first."""
+    counts: Dict[str, int] = {}
+    for endpoint in endpoints:
+        name = continent_of(endpoint, mapping)
+        counts[name] = counts.get(name, 0) + 1
+    return sorted(counts.items(), key=lambda item: (-item[1], item[0]))
+
+
+def filter_endpoints(
+    endpoints: Sequence[Endpoint],
+    mapping: Dict[str, str],
+    continent: str = ANY_CONTINENT,
+    query: str = "",
+) -> List[Endpoint]:
+    """Endpoints in one continent (or all) that match a free-text query."""
+    needle = query.strip().lower()
+    result = []
+    for endpoint in endpoints:
+        if continent and continent_of(endpoint, mapping) != continent:
+            continue
+        if needle and needle not in f"{endpoint.country} {endpoint.city} {endpoint.ip} {endpoint.hostname}".lower():
+            continue
+        result.append(endpoint)
+    return result

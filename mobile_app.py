@@ -20,13 +20,17 @@ from __future__ import annotations
 import logging
 import threading
 import time
-from typing import Callable, List, Optional
+from typing import Callable, Dict, List, Optional
 
 import flet as ft
 
 from browser_harvest import DEFAULT_DATA_FILE, BlueprintData, is_placeholder_key, load_blueprint
 from config_builder import country_code_to_flag, generate_qr_code_base64, is_valid_wg_key
 from mobile_core import (
+    ANY_CONTINENT,
+    continent_by_country_code,
+    continents_present,
+    filter_endpoints,
     DEFAULT_PRESET,
     PRESETS,
     CopyQueue,
@@ -57,6 +61,7 @@ WARN_BG = "#3A2E00"
 WARN = "#FFD54F"
 ERROR = "#FF8A80"
 MUTED = "#90A4AE"
+TEXT = "#FFFFFF"
 MONO = "monospace"
 
 PROGRESS_THROTTLE_S = 0.3
@@ -97,6 +102,8 @@ class MobileStudioApp:
         self.expanded_countries: set = set()
         self._default_expansion_applied: bool = False
         self.search_text: str = ""
+        self.continent_filter: str = ANY_CONTINENT
+        self.continent_map: Dict[str, str] = continent_by_country_code(self.blueprint.servers)
         self.current_tab: int = 0
         self.vpn: Optional[VpnStatus] = _safe_vpn_status()
 
@@ -117,7 +124,7 @@ class MobileStudioApp:
     # ------------------------------------------------------------------
     def _init_page(self):
         page = self.page
-        page.title = "Surfshark AWG"
+        page.title = "Surfshark AmneziaWG Studio"
         page.rtl = True
         page.theme_mode = ft.ThemeMode.DARK
         page.bgcolor = BG
@@ -144,6 +151,17 @@ class MobileStudioApp:
             on_click=self._open_group_actions,
         )
         page.floating_action_button = self.fab
+        page.appbar = ft.AppBar(
+            leading=ft.Icon(ft.Icons.SHIELD_ROUNDED, color=ACCENT, size=26),
+            leading_width=48,
+            title=ft.Column(spacing=0, tight=True, controls=[
+                ft.Text("Surfshark AmneziaWG Studio", size=16, weight=ft.FontWeight.BOLD),
+                ft.Text("نسخه‌ی گوشی", size=11, color=MUTED),
+            ]),
+            center_title=False,
+            bgcolor=CARD,
+            actions=[ft.IconButton(icon=ft.Icons.REFRESH_ROUNDED, tooltip="بارگذاری مجدد", on_click=self._reload_all)],
+        )
 
         self.host = ft.Container(expand=True, padding=ft.padding.symmetric(horizontal=14, vertical=12))
         page.add(self.host)
@@ -242,6 +260,7 @@ class MobileStudioApp:
 
     def _reload_all(self, e=None):
         self.blueprint = load_blueprint(DEFAULT_DATA_FILE)
+        self.continent_map = continent_by_country_code(self.blueprint.servers)
         self._load_cache()
         self.vpn = _safe_vpn_status()
         self._render_servers()
@@ -275,6 +294,9 @@ class MobileStudioApp:
             on_change=self._on_search,
         )
         self.country_list = ft.Column(spacing=8)
+        self.dashboard_row = ft.Row(wrap=True, spacing=8, run_spacing=8)
+        self.continent_row = ft.Row(wrap=True, spacing=6, run_spacing=6)
+        self.bulk_row = ft.Row(wrap=True, spacing=8, run_spacing=8)
 
         self.servers_view = ft.Column(
             expand=True,
@@ -285,7 +307,10 @@ class MobileStudioApp:
                 self.summary_text,
                 self.vpn_banner,
                 self.key_banner,
+                self.dashboard_row,
+                self.continent_row,
                 self.search_field,
+                self.bulk_row,
                 self.country_list,
                 ft.Container(height=72),
             ],
@@ -474,12 +499,12 @@ class MobileStudioApp:
             return
 
         query = self.search_text.strip().lower()
-        visible = [
-            e for e in self.endpoints
-            if not query or query in f"{e.country} {e.city} {e.ip} {e.hostname}".lower()
-        ]
+        visible = filter_endpoints(self.endpoints, self.continent_map, self.continent_filter, self.search_text)
+        self._render_dashboard(visible)
+        self._render_continent_chips()
+        self._render_bulk_actions(visible)
         if not visible:
-            self.country_list.controls = [self._empty_card("موردی با این جستجو پیدا نشد.")]
+            self.country_list.controls = [self._empty_card("موردی با این فیلتر یا جستجو پیدا نشد.")]
             return
 
         groups = group_by_country(visible)
@@ -491,6 +516,73 @@ class MobileStudioApp:
             self._country_tile(country, items, expanded=bool(query) or country in self.expanded_countries)
             for country, items in groups
         ]
+
+    def _stat_tile(self, label: str, value: str, color: str = TEXT) -> ft.Container:
+        return ft.Container(
+            bgcolor=CARD,
+            border_radius=12,
+            padding=ft.padding.symmetric(horizontal=12, vertical=10),
+            width=150,
+            content=ft.Column(spacing=2, tight=True, controls=[
+                ft.Text(label, size=11, color=MUTED),
+                ft.Text(value, size=20, weight=ft.FontWeight.BOLD, color=color),
+            ]),
+        )
+
+    def _render_dashboard(self, visible: List[Endpoint]):
+        countries = {e.country for e in self.endpoints}
+        fastest = min((e.latency_ms for e in self.endpoints if e.has_latency), default=None)
+        self.dashboard_row.controls = [
+            self._stat_tile("سرورهای سالم", str(len(self.endpoints)), ACCENT),
+            self._stat_tile("کشورها", str(len(countries))),
+            self._stat_tile("سریع‌ترین", f"{int(fastest)}ms" if fastest is not None else "—", ACCENT),
+            self._stat_tile("نمایش داده‌شده", str(len(visible))),
+            self._stat_tile("انتخاب‌شده", str(len(self.selected)), WARN if self.selected else TEXT),
+        ]
+
+    def _set_continent(self, name: str):
+        self.continent_filter = name
+        self._render_servers()
+        self._update()
+
+    def _render_continent_chips(self):
+        options = [(ANY_CONTINENT, len(self.endpoints))] + continents_present(self.endpoints, self.continent_map)
+        self.continent_row.controls = [
+            ft.Chip(
+                label=ft.Text(f"{'همه‌ی قاره‌ها' if name == ANY_CONTINENT else name} ({count})", size=12),
+                selected=self.continent_filter == name,
+                on_select=lambda e, n=name: self._set_continent(n),
+            )
+            for name, count in options
+        ]
+
+    def _render_bulk_actions(self, visible: List[Endpoint]):
+        self.bulk_row.controls = [
+            ft.ElevatedButton(
+                f"انتخاب همه‌ی نمایش‌داده‌شده ({len(visible)})",
+                icon=ft.Icons.DONE_ALL_ROUNDED,
+                disabled=not visible,
+                on_click=lambda e: self._select_visible(visible),
+            ),
+            ft.OutlinedButton(
+                "پاک کردن انتخاب",
+                icon=ft.Icons.CLEAR_ALL_ROUNDED,
+                disabled=not self.selected,
+                on_click=lambda e: self._clear_selection_now(),
+            ),
+        ]
+
+    def _select_visible(self, visible: List[Endpoint]):
+        self.selected.update(e.key for e in visible)
+        self._render_servers()
+        self._refresh_fab()
+        self._update()
+
+    def _clear_selection_now(self):
+        self.selected.clear()
+        self._render_servers()
+        self._refresh_fab()
+        self._update()
 
     def _empty_card(self, text: str) -> ft.Container:
         return ft.Container(
